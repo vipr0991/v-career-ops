@@ -1,0 +1,15 @@
+model_list:
+  - model_name: kimi-k2.5
+    litellm_params:
+      model: moonshot/kimi-k2.5
+      api_key: os.environ/MOONSHOT_API_KEY
+
+  - model_name: kimi-k2.6
+    litellm_params:
+      model: moonshot/kimi-k2.6
+      api_key: os.environ/MOONSHOT_API_KEY
+
+  - model_name: kimi-k2-turbo
+    litellm_params:
+      model: moonshot/kimi-k2-turbo
+      api_key: os.environ/MOONSHOT_API_KEY

@@ -1,0 +1,9 @@
+{
+  "name": "career-ops-api",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "fastify": "^4.0.0"
+  }
+}

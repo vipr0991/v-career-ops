@@ -1,0 +1,59 @@
+model_list:
+  # ─── Scoring & Parsing: Gemini (free tier, fast) ────────────────
+  - model_name: ag-scoring
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: "os.environ/GEMINI_API_KEY"
+  - model_name: ag-parser
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: "os.environ/GEMINI_API_KEY"
+  - model_name: ag-search
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: "os.environ/GEMINI_API_KEY"
+
+  # ─── Chat, Tailor, Interview: Kimi/Moonshot ────────────────────
+  # Correct base URL: https://api.moonshot.ai/v1
+  - model_name: ag-chat
+    litellm_params:
+      model: openai/moonshot-v1-128k
+      api_key: "os.environ/KIMI_API_KEY"
+      api_base: "https://api.moonshot.ai/v1"
+  - model_name: ag-tailor
+    litellm_params:
+      model: openai/moonshot-v1-128k
+      api_key: "os.environ/KIMI_API_KEY"
+      api_base: "https://api.moonshot.ai/v1"
+  - model_name: ag-interview
+    litellm_params:
+      model: openai/moonshot-v1-128k
+      api_key: "os.environ/KIMI_API_KEY"
+      api_base: "https://api.moonshot.ai/v1"
+  - model_name: ag-latex
+    litellm_params:
+      model: openai/moonshot-v1-128k
+      api_key: "os.environ/KIMI_API_KEY"
+      api_base: "https://api.moonshot.ai/v1"
+
+  # ─── Aliases ────────────────────────────────────────────────────
+  - model_name: kimi-k2.5
+    litellm_params:
+      model: openai/moonshot-v1-128k
+      api_key: "os.environ/KIMI_API_KEY"
+      api_base: "https://api.moonshot.ai/v1"
+  - model_name: gemini-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: "os.environ/GEMINI_API_KEY"
+
+  # ─── Local Ollama Models ───────────────────────────────────────
+  - model_name: ag-local-qwen
+    litellm_params:
+      model: ollama/qwen3.6:latest
+      api_base: http://localhost:11434
+  - model_name: ag-local-gemma
+    litellm_params:
+      model: ollama/gemma4:latest
+      api_base: http://localhost:11434
+

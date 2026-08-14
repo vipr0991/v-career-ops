@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: career-ops-api
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./reports:/app/reports
+      - ./output:/app/output
+      - ./resumes:/app/resumes
+      - ./latex_resumes:/app/latex_resumes
+      - ./config:/app/config
+    networks:
+      - career-ops-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./dashboard-web
+      dockerfile: Dockerfile
+    container_name: career-ops-dashboard
+    ports:
+      - "5174:5174"
+    environment:
+      - VITE_API_BASE=http://api:5000
+      - NODE_ENV=development
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - career-ops-net
+
+networks:
+  career-ops-net:
+    driver: bridge

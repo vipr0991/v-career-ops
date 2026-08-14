@@ -1,0 +1,3 @@
+# Career-Ops Dashboard — Private application, do not index
+User-agent: *
+Disallow: /

@@ -1,0 +1,76 @@
+version: '3.8'
+
+# Production-ready Docker Compose
+# Build with: docker compose -f docker-compose.prod.yml build
+# Run with: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: career-ops-api
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - api_reports:/app/reports
+      - api_output:/app/output
+      - api_resumes:/app/resumes
+      - api_latex:/app/latex_resumes
+      - api_config:/app/config
+    networks:
+      - career-ops-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dashboard:
+    build:
+      context: ./dashboard-web
+      dockerfile: Dockerfile.prod
+    container_name: career-ops-dashboard
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - career-ops-net
+    environment:
+      - VITE_API_BASE=http://api:5000
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  api_reports:
+  api_output:
+  api_resumes:
+  api_latex:
+  api_config:
+
+networks:
+  career-ops-net:
+    driver: bridge
