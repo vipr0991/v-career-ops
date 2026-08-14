@@ -1,46 +1,73 @@
 version: '3.8'
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Career-Ops Production Stack
+# Usage:
+#   docker compose up --build          → local dev (reads .env.local)
+#   docker compose -f docker-compose.prod.yml up → production parity
+# ─────────────────────────────────────────────────────────────────────────────
+
 services:
-  backend:
+  # ── Fastify API ─────────────────────────────────────────────────────────────
+  api:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./api
+      dockerfile: Dockerfile
     container_name: career-ops-api
+    restart: unless-stopped
     environment:
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - NODE_ENV=production
+      - PORT=8080
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
     ports:
-      - "5000:5000"
-    volumes:
-      - ./reports:/app/reports
-      - ./output:/app/output
-      - ./resumes:/app/resumes
-      - ./latex_resumes:/app/latex_resumes
-      - ./config:/app/config
+      - "8080:8080"
     networks:
       - career-ops-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
-      interval: 10s
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
       timeout: 5s
+      start_period: 10s
       retries: 3
 
-  frontend:
+  # ── PDF Worker (Playwright/Chromium) ────────────────────────────────────────
+  pdf-worker:
+    build:
+      context: ./pdf-worker
+      dockerfile: Dockerfile
+    container_name: career-ops-pdf-worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - PCLOUD_ACCESS_TOKEN=${PCLOUD_ACCESS_TOKEN}
+      - PCLOUD_API_HOST=${PCLOUD_API_HOST:-api.pcloud.com}
+    networks:
+      - career-ops-net
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # ── React Dashboard (dev mode only; prod serves from Vercel) ──────────────
+  dashboard:
     build:
       context: ./dashboard-web
       dockerfile: Dockerfile
     container_name: career-ops-dashboard
+    restart: unless-stopped
+    environment:
+      - VITE_API_BASE=http://api:8080
+      - NODE_ENV=development
     ports:
       - "5174:5174"
-    environment:
-      - VITE_API_BASE=http://api:5000
-      - NODE_ENV=development
-    depends_on:
-      backend:
-        condition: service_healthy
     networks:
       - career-ops-net
+    depends_on:
+      api:
+        condition: service_healthy
 
 networks:
   career-ops-net:
