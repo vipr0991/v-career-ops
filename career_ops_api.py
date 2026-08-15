@@ -471,8 +471,73 @@ async def update_pipeline_status(item_id: str, req: PipelineStatusRequest):
 async def delete_pipeline_item(item_id: str = Query(...)):
     return {"status":"deleted","item_id":item_id}
 
+class ChatRequest(BaseModel):
+    message: str
+    context: Optional[str] = None
+
+@app.post("/api/chat")
+async def chat_with_assistant(req: ChatRequest):
+    """Route chat messages to Gemini or fallback assistant."""
+    gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if gemini_key:
+        prompt = f"""You are Career-Ops AI, a helpful career assistant for Vinay Prakash.
+You assist with job applications, resume tailoring, interview prep, cover letters, and career strategy in Dubai / UAE / GCC.
+Be actionable, concise, and structured.
+
+User Message: {req.message}"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                res = await client.post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+                    headers={"Content-Type": "application/json"},
+                    params={"key": gemini_key},
+                    json={
+                        "contents": [{"parts": [{"text": prompt}]}],
+                        "generationConfig": {"temperature": 0.3}
+                    }
+                )
+                if res.status_code == 200:
+                    data = res.json()
+                    ans = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                    if ans:
+                        return {"response": ans, "model": "Gemini 2.5 Flash"}
+        except Exception as e:
+            print(f"[Chat] Gemini error: {e}")
+
+    # Intelligent fallback reply if API is unreachable
+    return {
+        "response": f"I received your request: '{req.message}'. I can help analyze job descriptions, customize your CV for target roles in the GCC region, and prepare targeted interview talking points. What specific role would you like to target?",
+        "model": "Career-Ops Assistant"
+    }
+
+# ── Static Dashboard SPA Serving ─────────────────────────────────────────────
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+STATIC_DIST = os.path.join(BASE_DIR, "dashboard-web", "dist")
+ASSETS_DIR = os.path.join(STATIC_DIST, "assets")
+
+if os.path.exists(ASSETS_DIR):
+    app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
+
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    if full_path.startswith("api/") or full_path == "api" or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+        raise HTTPException(404, "API endpoint not found")
+    
+    target = os.path.join(STATIC_DIST, full_path)
+    if os.path.isfile(target):
+        return FileResponse(target)
+    
+    index_file = os.path.join(STATIC_DIST, "index.html")
+    if os.path.isfile(index_file):
+        return FileResponse(index_file)
+    
+    return {"service": "Career-Ops API", "version": "3.5.0", "status": "online"}
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", "5000"))
     print(f"[Career-Ops] API v3.5.0 — http://0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+
