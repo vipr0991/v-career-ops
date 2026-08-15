@@ -47,3 +47,4 @@ bun.lock
 .claude/settings.local.json
 .claude/memory/
 career-dashboard
+.vercel

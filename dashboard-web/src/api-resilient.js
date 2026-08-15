@@ -5,9 +5,9 @@
 
 // Multi-strategy API endpoint discovery
 const API_ENDPOINTS = [
-  import.meta.env.VITE_API_BASE || 'http://localhost:5000',
+  import.meta.env.VITE_API_BASE ?? '',
+  'http://localhost:5000',
   'http://127.0.0.1:5000',
-  'http://0.0.0.0:5000',
 ];
 
 let currentEndpointIndex = 0;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import ScoreRing from '../components/ScoreRing'
 import * as api from '../api-resilient'
 
-const API_BASE = 'http://localhost:5000'
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 const ROLE_PRESETS = [
   'AI Content & Automation Specialist',

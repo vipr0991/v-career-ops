@@ -8,8 +8,8 @@ import ResumeHubPage from './pages/ResumeHubPage'
 import InterviewPrepPage from './pages/InterviewPrepPage'
 import SettingsPage from './pages/SettingsPage'
 
-// Environment-aware API base — uses import.meta.env.VITE_API_BASE from .env
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+// Environment-aware API base — uses relative '' when co-hosted on Railway, or VITE_API_BASE
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
