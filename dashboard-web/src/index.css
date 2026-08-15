@@ -124,6 +124,7 @@ body::before {
   width: var(--sidebar-width);
   min-height: 100vh;
   background: rgba(10, 14, 26, 0.95);
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   border-right: 1px solid var(--border-subtle);
   display: flex;
@@ -306,6 +307,7 @@ body::before {
 .topbar {
   height: var(--topbar-height);
   background: rgba(10, 14, 26, 0.85);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
@@ -421,6 +423,7 @@ body::before {
   width: var(--chat-drawer-width);
   height: 100vh;
   background: rgba(10, 14, 26, 0.97);
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   border-left: 1px solid var(--border-subtle);
   z-index: 300;
@@ -631,6 +634,7 @@ body::before {
 
 .stat-card {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -696,6 +700,7 @@ body::before {
 
 .quick-action-card {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -745,6 +750,7 @@ body::before {
 /* ─── Recent Activity ────────────────────────────────── */
 .activity-feed {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -1191,6 +1197,7 @@ body::before {
   gap: 0;
   margin-bottom: 24px;
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -1243,6 +1250,7 @@ body::before {
 /* ─── Search Panel ───────────────────────────────────── */
 .search-panel {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -1488,6 +1496,7 @@ textarea.form-input:focus {
 /* ─── Job Card ───────────────────────────────────────── */
 .job-card {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -1620,6 +1629,7 @@ textarea.form-input:focus {
 /* ─── Score Detail Panel ──────────────────────────────── */
 .score-detail {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -1709,6 +1719,7 @@ textarea.form-input:focus {
 /* ─── Optimization Progress ──────────────────────────── */
 .optimize-panel {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -1786,6 +1797,7 @@ textarea.form-input:focus {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -1947,6 +1959,7 @@ textarea.form-input:focus {
 /* ─── Section Panel Reusable ─────────────────────────── */
 .panel {
   background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -2030,6 +2043,7 @@ textarea.form-input:focus {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   z-index: 190;
 }
@@ -2037,6 +2051,7 @@ textarea.form-input:focus {
 /* ─── Search Panel Clean ──────────────────────────────── */
 .search-panel {
   background: rgba(17, 24, 39, 0.75);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -2325,6 +2340,7 @@ textarea.form-input:focus {
 /* ─── Clean Job Card ─────────────────────────────────── */
 .job-card-clean {
   background: rgba(17, 24, 39, 0.75);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -2602,6 +2618,7 @@ textarea.form-input:focus {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
