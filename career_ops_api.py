@@ -324,6 +324,42 @@ async def upload_resume_endpoint(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/resumes")
+async def list_resumes():
+    """List all resumes uploaded to RESUMES_DIR."""
+    files = []
+    if os.path.exists(RESUMES_DIR):
+        for f in sorted(os.listdir(RESUMES_DIR), reverse=True):
+            fpath = os.path.join(RESUMES_DIR, f)
+            if os.path.isfile(fpath) and not f.startswith("."):
+                stat = os.stat(fpath)
+                size_kb = round(stat.st_size / 1024, 1)
+                size_str = f"{size_kb} KB" if size_kb < 1024 else f"{round(size_kb/1024, 1)} MB"
+                mod_time = time.strftime("%b %d, %Y", time.localtime(stat.st_mtime))
+                files.append({
+                    "name": f,
+                    "size": size_str,
+                    "date": mod_time
+                })
+    return {"files": files, "total": len(files)}
+
+@app.delete("/api/resumes")
+async def delete_resume(filename: str = Query(...)):
+    """Delete a resume file from RESUMES_DIR."""
+    # Prevent directory traversal
+    clean_name = os.path.basename(filename)
+    fpath = os.path.join(RESUMES_DIR, clean_name)
+    if os.path.exists(fpath):
+        try:
+            os.remove(fpath)
+            return {"status": "deleted", "filename": clean_name}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to delete file: {e}")
+    raise HTTPException(status_code=404, detail="File not found")
+
+# Serve uploaded resumes for direct preview and download
+app.mount("/resumes", StaticFiles(directory=RESUMES_DIR), name="resumes")
+
 # ── Pipeline CRUD Endpoints ──────────────────────────────────────────────────
 
 @app.get("/api/pipeline")
