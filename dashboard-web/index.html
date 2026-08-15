@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
     <!-- Google reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=6Ld4_oYtAAAAAPwqLLcsJWIB2x8Hw1guAZxSoz0C"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LebFoctAAAAAEdiBxpm_qy7XUu_2wqZP714cStG"></script>
   </head>
   <body>
     <div id="auth-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#111827;z-index:999999;display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff;font-family:Inter,sans-serif;">
@@ -63,7 +63,7 @@
 
           if (typeof grecaptcha !== 'undefined') {
             grecaptcha.ready(function() {
-              grecaptcha.execute('6Ld4_oYtAAAAAPwqLLcsJWIB2x8Hw1guAZxSoz0C', {action: 'login'})
+              grecaptcha.execute('6LebFoctAAAAAEdiBxpm_qy7XUu_2wqZP714cStG', {action: 'login'})
                 .then(function(token) {
                   verifyAndLogin(token);
                 })
