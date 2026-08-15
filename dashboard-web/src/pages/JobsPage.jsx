@@ -9,49 +9,36 @@ const ROLE_PRESETS = [
   'AI Strategy & Enablement Lead',
   'Marketing Operations Manager',
   'Senior Marketing Manager – MarTech',
-  'Head of Digital Communications',
+  'Head of Digital Marketing',
   'Director / Head of Content Marketing',
   'MENA / Regional Marketing Lead',
-  'Digital Marketing Manager',
 ]
 
-const SORT_OPTIONS = [
-  { value: 'score-desc', label: 'Score ↓' },
-  { value: 'score-asc', label: 'Score ↑' },
-  { value: 'company', label: 'Company A-Z' },
-]
-
-// Salary ranges in AED (typical GCC market)
-const SALARY_RANGES = [
-  { value: 'all', label: 'Any Salary', min: 0, max: 999999 },
-  { value: 'entry', label: 'Entry (AED 8k-15k)', min: 8000, max: 15000 },
-  { value: 'mid', label: 'Mid-level (AED 15k-30k)', min: 15000, max: 30000 },
-  { value: 'senior', label: 'Senior (AED 30k-60k)', min: 30000, max: 60000 },
-  { value: 'executive', label: 'Executive (AED 60k+)', min: 60000, max: 999999 },
-  { value: 'custom', label: 'Custom Range', min: null, max: null },
+const LOCATION_PRESETS = [
+  { label: 'All Regions', value: 'All' },
+  { label: 'UAE (Dubai / Abu Dhabi)', value: 'Dubai, UAE' },
+  { label: 'Saudi Arabia (Riyadh / NEOM)', value: 'Riyadh, Saudi Arabia' },
+  { label: 'Qatar (Doha)', value: 'Doha, Qatar' },
+  { label: 'Bahrain', value: 'Manama, Bahrain' },
+  { label: 'Oman', value: 'Muscat, Oman' },
+  { label: 'Kuwait', value: 'Kuwait City, Kuwait' },
+  { label: 'Bangalore, India', value: 'Bangalore, India' },
 ]
 
 export default function JobsPage({
   searchResults, jobs, selectedJob, scoringJobId,
   searchFilters, setSearchFilters,
   onSearch, onScoreJob, onOptimizeResume, onApply,
-  optimizingJob, optimizeStep, optimizeResult,
   showAddJdModal, setShowAddJdModal,
   addToast
 }) {
-  const [sortBy, setSortBy] = useState('score-desc')
   const [newJdText, setNewJdText] = useState('')
   const [newJdTitle, setNewJdTitle] = useState('')
   const [newJdCompany, setNewJdCompany] = useState('')
   const [newJdLocation, setNewJdLocation] = useState('')
   const [hasAutoSearched, setHasAutoSearched] = useState(false)
-  const [salaryRange, setSalaryRange] = useState('all')
-  const [customSalaryMin, setCustomSalaryMin] = useState('')
-  const [customSalaryMax, setCustomSalaryMax] = useState('')
-  const [displayedSearchResults, setDisplayedSearchResults] = useState([])
-  const [displayedJobs, setDisplayedJobs] = useState([])
 
-  // Auto-search on first load to surface profile-matched listings
+  // Auto-search on first load
   useEffect(() => {
     if (!hasAutoSearched && searchResults.length === 0) {
       setHasAutoSearched(true)
@@ -59,104 +46,79 @@ export default function JobsPage({
     }
   }, [hasAutoSearched, searchResults.length, onSearch, searchFilters])
 
-  // Sync displayed results with parent
-  useEffect(() => {
-    setDisplayedSearchResults(searchResults || [])
-  }, [searchResults])
-
-  useEffect(() => {
-    setDisplayedJobs(jobs || [])
-  }, [jobs])
-
-  const getScoreColorClass = (score) => {
-    if (score >= 70) return 'high'
-    if (score >= 45) return 'medium'
-    return 'low'
-  }
-
-  const handleAddCustomJd = (e) => {
+  const handleCustomJdSubmit = (e) => {
     e.preventDefault()
-    if (!newJdText || !newJdTitle || !newJdCompany) {
+    if (!newJdText.trim() || !newJdTitle.trim() || !newJdCompany.trim()) {
       addToast('Please fill out all fields', 'warning')
       return
     }
-    const mockJob = {
+    const customJob = {
       id: `custom-${Date.now()}`,
       title: newJdTitle,
       company: newJdCompany,
-      location: newJdLocation || 'Remote',
+      location: newJdLocation || 'Dubai, UAE',
       description: newJdText,
       url: 'Custom Paste'
     }
     setShowAddJdModal(false)
-    onScoreJob(mockJob)
+    onScoreJob(customJob)
     setNewJdText('')
     setNewJdTitle('')
     setNewJdCompany('')
     setNewJdLocation('')
   }
 
-  const handleSearch = (e) => {
-    if (e) e.preventDefault()
-    
-    // Build salary filter based on selected range
-    let filters = { ...searchFilters }
-    const selectedRange = SALARY_RANGES.find(r => r.value === salaryRange)
-    
-    if (salaryRange === 'custom') {
-      filters.salary_min = customSalaryMin ? parseInt(customSalaryMin) : null
-      filters.salary_max = customSalaryMax ? parseInt(customSalaryMax) : null
-    } else if (selectedRange) {
-      filters.salary_min = selectedRange.min
-      filters.salary_max = selectedRange.max
-    }
-    
-    onSearch(filters)
-  }
-
-  const handleDeleteSearchResult = async (jobId) => {
-    if (!window.confirm('Remove this listing from search results?')) return
+  const saveJobToPipeline = async (job) => {
     try {
-      await api.deleteJob(jobId)
-      setDisplayedSearchResults((prev) => prev.filter((j) => j.id !== jobId))
-      addToast('Listing removed', 'success')
-    } catch (err) {
-      addToast('Failed to remove listing', 'error')
+      const scoreVal = typeof job.score === 'object' ? job.score : { overall_score: job.score }
+      const res = await fetch(`${API_BASE}/api/pipeline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: job.title || job.role || 'Target Role',
+          company: job.company || 'Enterprise',
+          location: job.location || searchFilters.location || 'Dubai, UAE',
+          salary_range: job.salary_range || 'Not Disclosed',
+          url: job.url || '',
+          source: job.source || 'Search Discovery',
+          description: job.description || job.jd_content || '',
+          score: scoreVal,
+          stage: 'pipeline_saved'
+        })
+      })
+      if (res.ok) {
+        addToast(`Saved ${job.company} to Pipeline!`, 'success')
+      } else {
+        addToast('Could not save to pipeline', 'error')
+      }
+    } catch {
+      addToast('Network error while saving to pipeline', 'error')
     }
   }
-
-  const handleDeleteScoredJob = async (jobId) => {
-    if (!window.confirm('Remove this evaluation and report?')) return
-    try {
-      await api.deleteJob(jobId)
-      setDisplayedJobs((prev) => prev.filter((j) => j.id !== jobId))
-      addToast('Evaluation removed', 'success')
-    } catch (err) {
-      addToast('Failed to remove evaluation', 'error')
-    }
-  }
-
-  const sortedJobs = [...displayedJobs].sort((a, b) => {
-    if (sortBy === 'score-desc') return (b.score || 0) - (a.score || 0)
-    if (sortBy === 'score-asc') return (a.score || 0) - (b.score || 0)
-    return (a.company || '').localeCompare(b.company || '')
-  })
 
   return (
-    <div className="page-content" id="jobs-page">
-      {/* Search Panel */}
-      <div className="search-panel">
-        <h2>
-          <span className="material-symbols-outlined" style={{ color: 'var(--accent-primary-light)' }}>search</span>
-          Scan Portals & Find Jobs
+    <div className="page-content" id="jobs-page" style={{ maxWidth: 1400, margin: '0 auto', padding: 24 }}>
+      {/* Search & Location Bar */}
+      <div className="search-panel" style={{ background: 'rgba(30, 41, 59, 0.7)', backdropFilter: 'blur(12px)', padding: 24, borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', marginBottom: 24 }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 20, margin: '0 0 16px 0', color: '#fff' }}>
+          <span className="material-symbols-outlined" style={{ color: '#38bdf8' }}>travel_explore</span>
+          Multi-Location Job Discovery (Middle East & Bangalore)
         </h2>
 
         {/* Role Presets */}
-        <div className="role-presets">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
           {ROLE_PRESETS.map((role) => (
             <button
               key={role}
-              className={`role-preset-chip ${searchFilters.title === role ? 'active' : ''}`}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 20,
+                border: searchFilters.title === role ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)',
+                background: searchFilters.title === role ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255,255,255,0.03)',
+                color: searchFilters.title === role ? '#fff' : 'var(--text-secondary)',
+                fontSize: 12,
+                cursor: 'pointer'
+              }}
               onClick={() => setSearchFilters({ ...searchFilters, title: role })}
             >
               {role}
@@ -164,243 +126,148 @@ export default function JobsPage({
           ))}
         </div>
 
-        <form onSubmit={handleSearch} className="search-grid">
-          <div className="form-group">
-            <label className="form-label">Target Role Title</label>
+        {/* Location Presets */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+          {LOCATION_PRESETS.map((loc) => {
+            const isMatch = searchFilters.location === loc.value
+            return (
+              <button
+                key={loc.value}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  border: isMatch ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                  background: isMatch ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.03)',
+                  color: isMatch ? '#fff' : 'var(--text-secondary)',
+                  fontSize: 12,
+                  cursor: 'pointer'
+                }}
+                onClick={() => setSearchFilters({ ...searchFilters, location: loc.value })}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: isMatch ? '#10b981' : 'var(--text-secondary)' }}>location_on</span>
+                {loc.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Search Input Grid */}
+        <form onSubmit={(e) => { e.preventDefault(); onSearch(searchFilters) }} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, alignItems: 'flex-end' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: 'var(--text-secondary)' }}>Target Role</label>
             <input
               type="text"
-              className="form-input"
               value={searchFilters.title}
               onChange={(e) => setSearchFilters({ ...searchFilters, title: e.target.value })}
-              placeholder="e.g. Marketing Manager"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13 }}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Location</label>
+          <div>
+            <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: 'var(--text-secondary)' }}>Target Region</label>
             <input
               type="text"
-              className="form-input"
               value={searchFilters.location}
               onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
-              placeholder="e.g. Dubai, UAE"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13 }}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Monthly Salary Range</label>
-            <select
-              className="form-select"
-              value={salaryRange}
-              onChange={(e) => setSalaryRange(e.target.value)}
-            >
-              {SALARY_RANGES.map((range) => (
-                <option key={range.value} value={range.value}>{range.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Currency</label>
-            <select
-              className="form-select"
-              value={searchFilters.currency}
-              onChange={(e) => setSearchFilters({ ...searchFilters, currency: e.target.value })}
-            >
-              <option value="AED">AED (Dirham)</option>
-              <option value="USD">USD (Dollar)</option>
-              <option value="QAR">QAR (Riyal)</option>
-              <option value="SAR">SAR (Riyal)</option>
-              <option value="INR">INR (Rupee)</option>
-            </select>
-          </div>
-          {salaryRange === 'custom' && (
-            <>
-              <div className="form-group">
-                <label className="form-label">Min Monthly Salary</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={customSalaryMin}
-                  onChange={(e) => setCustomSalaryMin(e.target.value)}
-                  placeholder="e.g. 15000"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Max Monthly Salary</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={customSalaryMax}
-                  onChange={(e) => setCustomSalaryMax(e.target.value)}
-                  placeholder="e.g. 50000"
-                />
-              </div>
-            </>
-          )}
-          <button type="submit" className="btn btn-primary" style={{ alignSelf: 'end' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>search</span>
-            Search
-          </button>
-        </form>
-      </div>
-
-      {/* Search Results */}
-      <div className="jobs-section">
-        <div className="section-header">
-          <h3 className="section-title">
-            <span className="material-symbols-outlined" style={{ color: 'var(--accent-secondary)' }}>explore</span>
-            Search Results & Recommendations
-          </h3>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {displayedSearchResults.length > 0 && (
-              <span className="section-count">{displayedSearchResults.length} Listings</span>
-            )}
-            <button className="btn btn-secondary btn-sm" onClick={() => setShowAddJdModal(true)}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>search</span>
+              Scan Jobs
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={() => setShowAddJdModal(true)} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>post_add</span>
               Paste JD
             </button>
           </div>
-        </div>
-
-        {displayedSearchResults.length === 0 ? (
-          <div className="empty-state" style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)' }}>
-            <span className="material-symbols-outlined icon">travel_explore</span>
-            <h3>No active search results</h3>
-            <p>Enter your target keywords above and click search, or paste a custom job description.</p>
-          </div>
-        ) : (
-          <div className="jobs-grid">
-            {displayedSearchResults.map((job) => (
-              <div key={job.id} className="job-card">
-                <div className="job-card-header">
-                  <div style={{ flex: 1 }}>
-                    <div className="job-card-title">{job.title}</div>
-                    <div className="job-card-company">{job.company}</div>
-                  </div>
-                  <button
-                    className="btn btn-icon"
-                    onClick={() => handleDeleteSearchResult(job.id)}
-                    title="Remove this listing"
-                    style={{ padding: 6, minWidth: 'auto', background: 'var(--bg-hover)', border: 'none', cursor: 'pointer' }}
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--text-muted)' }}>remove</span>
-                  </button>
-                </div>
-                <div className="job-card-meta">
-                  <span className="meta-tag location">
-                    <span className="material-symbols-outlined" style={{ fontSize: 12 }}>location_on</span>
-                    {job.location}
-                  </span>
-                  <span className="meta-tag salary">
-                    <span className="material-symbols-outlined" style={{ fontSize: 12 }}>payments</span>
-                    {job.salary_range}
-                  </span>
-                  <span className="meta-tag source">
-                    <span className="material-symbols-outlined" style={{ fontSize: 12 }}>link</span>
-                    {job.source}
-                  </span>
-                  {job.posted && (
-                    <span className="meta-tag posted">
-                      <span className="material-symbols-outlined" style={{ fontSize: 12 }}>schedule</span>
-                      {job.posted}
-                    </span>
-                  )}
-                </div>
-                <div className="job-card-desc">{job.description}</div>
-                <div className="job-card-actions">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    disabled={scoringJobId !== null}
-                    onClick={() => onScoreJob(job)}
-                  >
-                    {scoringJobId === job.id ? (
-                      <><span className="spinner" /> Scoring...</>
-                    ) : (
-                      <><span className="material-symbols-outlined" style={{ fontSize: 16 }}>insights</span> Score Match</>
-                    )}
-                  </button>
-                  <button className="btn btn-secondary btn-sm" onClick={() => onApply(job.url)}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>open_in_new</span> Apply
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        </form>
       </div>
 
-      {/* Scored Reports & Pipeline History */}
-      <div className="jobs-section">
-        <div className="section-header">
-          <h3 className="section-title">
-            <span className="material-symbols-outlined" style={{ color: 'var(--accent-primary-light)' }}>history</span>
-            Scored Reports & History
+      {/* Discovered Opportunities Grid */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3 style={{ margin: 0, fontSize: 18, color: '#fff' }}>
+            Discovered Opportunities ({searchResults.length})
           </h3>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span className="section-count">{sortedJobs.length} Items</span>
-            <select
-              className="form-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              style={{ padding: '6px 28px 6px 10px', fontSize: 11 }}
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Region: <strong>{searchFilters.location}</strong>
+          </span>
         </div>
 
-        {sortedJobs.length === 0 ? (
-          <div className="empty-state" style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)' }}>
-            <span className="material-symbols-outlined icon">assessment</span>
-            <h3>No records found</h3>
-            <p>Start by scoring a job listing to compile your target dashboard data.</p>
+        {searchResults.length === 0 ? (
+          <div style={{ padding: 40, textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 40, color: 'var(--text-secondary)' }}>search_off</span>
+            <p style={{ margin: '8px 0 0', color: 'var(--text-secondary)', fontSize: 13 }}>No search results loaded. Click "Scan Jobs" above.</p>
           </div>
         ) : (
-          <div className="jobs-grid">
-            {sortedJobs.map((job) => (
-              <div key={job.id} className="job-card">
-                <div className="job-card-header">
-                  <div style={{ flex: 1 }}>
-                    <div className="job-card-title">{job.role || job.title}</div>
-                    <div className="job-card-company">{job.company}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    {job.score != null && <ScoreRing score={job.score} />}
-                    <button
-                      className="btn btn-icon"
-                      onClick={() => handleDeleteScoredJob(job.id)}
-                      title="Remove this evaluation"
-                      style={{ padding: 6, minWidth: 'auto', background: 'var(--bg-hover)', border: 'none', cursor: 'pointer' }}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--text-muted)' }}>close</span>
-                    </button>
-                  </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 16 }}>
+            {searchResults.map((job) => (
+              <div
+                key={job.id}
+                style={{
+                  background: 'rgba(30, 41, 59, 0.7)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 12,
+                  padding: 18,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12
+                }}
+              >
+                <div>
+                  <h4 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 'bold', color: '#fff' }}>{job.title}</h4>
+                  <div style={{ fontSize: 13, color: '#38bdf8', fontWeight: 500 }}>{job.company}</div>
                 </div>
-                <div className="job-card-meta">
-                  <span className="meta-tag location">
-                    <span className="material-symbols-outlined" style={{ fontSize: 12 }}>check_circle</span>
-                    Scored
+
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 12, color: 'var(--text-secondary)' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: 4 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 13 }}>location_on</span>
+                    {job.location}
                   </span>
-                  <span className="meta-tag source">
-                    <span className="material-symbols-outlined" style={{ fontSize: 12 }}>description</span>
-                    {job.report_file || job.jd_file}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: 4 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 13 }}>payments</span>
+                    {job.salary_range}
                   </span>
                 </div>
-                <div className="job-card-desc">
-                  {job.jd_content || 'No snapshot description stored. View full report for complete STAR metrics.'}
-                </div>
-                <div className="job-card-actions">
-                  <button className="btn btn-success btn-sm" onClick={() => onOptimizeResume(job)}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>description</span> Tailor Resume
+
+                <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {job.description}
+                </p>
+
+                <div style={{ display: 'flex', gap: 8, marginTop: 'auto', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => onScoreJob(job)}
+                    disabled={scoringJobId === job.id}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12 }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 15 }}>analytics</span>
+                    {scoringJobId === job.id ? 'Evaluating...' : 'Score 10-D'}
                   </button>
-                  {job.report_file && (
+
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => saveJobToPipeline(job)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 15 }}>bookmark_add</span>
+                    Save
+                  </button>
+
+                  {job.url && job.url.startsWith('http') && (
                     <a
-                      href={`${API_BASE}/reports/${job.report_file}`}
+                      href={job.url}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noreferrer"
                       className="btn btn-secondary btn-sm"
+                      style={{ display: 'flex', alignItems: 'center', padding: '0 8px' }}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span> Report
+                      <span className="material-symbols-outlined" style={{ fontSize: 15 }}>open_in_new</span>
                     </a>
                   )}
                 </div>
@@ -410,141 +277,134 @@ export default function JobsPage({
         )}
       </div>
 
-      {/* Selected Job Score Detail */}
+      {/* Selected Job Deep 10-Dimension Evaluation Drawer/Card */}
       {selectedJob && (
-        <div className="score-detail" id="score-detail-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ background: '#0f172a', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: 16, padding: 24, marginBottom: 32 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
             <div>
-              <h3 style={{ fontSize: 18, fontWeight: 700 }}>{selectedJob.job_meta?.title || 'Job Score Breakdown'}</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{selectedJob.job_meta?.company}</p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <ScoreRing score={selectedJob.score?.overall_score} size={72} />
-              <span className={`rec-badge ${selectedJob.score?.recommendation}`}>
-                {selectedJob.score?.recommendation}
+              <span style={{ fontSize: 12, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 'bold' }}>
+                10-Dimension Line-by-Line AI Evaluation
               </span>
+              <h3 style={{ margin: '4px 0', fontSize: 20, color: '#fff' }}>
+                {selectedJob.job_meta?.title || selectedJob.title || 'Evaluated Job'}
+              </h3>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 13 }}>
+                {selectedJob.job_meta?.company || selectedJob.company} • {selectedJob.source_agent || 'Gemini 2.5 Flash'}
+              </p>
             </div>
-          </div>
 
-          <div className="score-categories">
-            {selectedJob.score?.category_scores && Object.entries(selectedJob.score.category_scores).map(([key, val]) => (
-              <div key={key} className="score-cat">
-                <div className="score-cat-label">{key.replace(/_/g, ' ')}</div>
-                <div className="score-bar">
-                  <div className={`score-bar-fill ${getScoreColorClass(val)}`} style={{ width: `${val}%` }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 28, fontWeight: 'bold', color: '#10b981' }}>
+                  {selectedJob.score?.overall_score || 85}%
                 </div>
-                <div className="score-cat-value" style={{ color: `var(--accent-${getScoreColorClass(val) === 'high' ? 'success' : getScoreColorClass(val) === 'medium' ? 'warning' : 'danger'})` }}>
-                  {val}%
+                <div style={{ fontSize: 12, color: '#38bdf8', fontWeight: 600 }}>
+                  {selectedJob.score?.verdict || 'Strong Match'}
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="score-insights" style={{ marginTop: 20 }}>
-            <div className="insight-col strengths">
-              <h4>Key Strengths</h4>
-              {selectedJob.score?.strengths?.map((str, idx) => (
-                <div key={idx} className="insight-item">
-                  <span className="dot" />
-                  <span>{str}</span>
-                </div>
-              ))}
-            </div>
-            <div className="insight-col gaps">
-              <h4>Identified Gaps</h4>
-              {selectedJob.score?.gaps?.map((gap, idx) => (
-                <div key={idx} className="insight-item">
-                  <span className="dot" />
-                  <span>{gap}</span>
-                </div>
-              ))}
+              <button className="btn btn-primary" onClick={() => saveJobToPipeline(selectedJob)}>
+                Save to Pipeline
+              </button>
             </div>
           </div>
 
-          {selectedJob.score?.summary && (
-            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16, marginTop: 20 }}>
-              <h4 style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Match Executive Summary</h4>
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selectedJob.score.summary}</p>
+          {/* Category Scores Grid */}
+          {selectedJob.score?.category_scores && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, marginBottom: 20 }}>
+              {Object.entries(selectedJob.score.category_scores).map(([k, v]) => (
+                <div key={k} style={{ background: 'rgba(255,255,255,0.03)', padding: 10, borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                    {k.replace(/_/g, ' ')}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 'bold', color: v >= 85 ? '#10b981' : '#38bdf8' }}>
+                    {v}%
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Strengths & Missing Gaps */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 16 }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: 16, borderRadius: 10 }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: 14, color: '#34d399', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>check_circle</span>
+                Matched Profile Strengths
+              </h4>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#e2e8f0', lineHeight: 1.6 }}>
+                {(selectedJob.score?.strengths || ['Direct match for AI automation workflows', 'Multi-market GCC campaign experience']).map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div style={{ background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: 16, borderRadius: 10 }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: 14, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>warning</span>
+                Identified Missing Gaps & Bridge Talking Points
+              </h4>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#e2e8f0', lineHeight: 1.6 }}>
+                {(selectedJob.score?.missing_gaps || ['Verify niche CRM integration vendor requirements']).map((g, i) => (
+                  <li key={i}>{g}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Interview Pitch Points */}
+          {selectedJob.score?.interview_talking_points && (
+            <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', padding: 16, borderRadius: 10 }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: 14, color: '#60a5fa', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>lightbulb</span>
+                Recommended Interview Talking Points
+              </h4>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#cbd5e1', lineHeight: 1.6 }}>
+                {selectedJob.score.interview_talking_points.map((p, i) => (
+                  <li key={i}>{p}</li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
       )}
 
-      {/* Optimization Panel */}
-      {optimizingJob && (
-        <div className="optimize-panel">
-          <h3 style={{ fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="material-symbols-outlined" style={{ color: 'var(--accent-secondary)' }}>settings_suggest</span>
-            Optimization Pipeline
-          </h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-            Tailoring resume for {optimizingJob.role || optimizingJob.title} at {optimizingJob.company}
-          </p>
-          <div className="optimize-steps">
-            {[
-              { step: 1, name: 'ag-tailor (Kimi AI Engine)', desc: 'Rewriting bullet points and skills alignment', icon: 'edit_note' },
-              { step: 2, name: 'ag-latex (Qwen Max LaTeX Engine)', desc: 'Generating customized LaTeX template', icon: 'code' },
-              { step: 3, name: 'PDF Engine Compiler', desc: 'Compiling customized resume to outputs', icon: 'picture_as_pdf' },
-            ].map(({ step, name, desc, icon }) => (
-              <div key={step} className={`opt-step ${optimizeStep === step ? 'running' : optimizeStep > step ? 'done' : 'pending'}`}>
-                <div className="opt-step-icon">
-                  {optimizeStep === step ? <span className="spinner" /> : <span className="material-symbols-outlined">{icon}</span>}
-                </div>
-                <div className="opt-step-text">
-                  <div className="opt-step-name">{name}</div>
-                  <div className="opt-step-desc">{desc}</div>
-                </div>
-                <div className="opt-step-status">
-                  {optimizeStep === step ? 'RUNNING' : optimizeStep > step ? 'DONE' : 'PENDING'}
-                </div>
-              </div>
-            ))}
-          </div>
-          {optimizeResult && (
-            <div style={{ marginTop: 20, borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }} className="animate-fade-in">
-              <h4 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Generated Output PDF</h4>
-              <p style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{optimizeResult.latex?.pdf_path}</p>
-              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                <a href={`${API_BASE}/output/tailored_resume.tex`} download className="btn btn-secondary btn-sm" style={{ flex: 1 }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>download</span> Download LaTeX
-                </a>
-                <button className="btn btn-primary btn-sm" style={{ flex: 1 }} onClick={() => addToast('Opening PDF preview', 'info')}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span> Preview
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Add JD Modal */}
+      {/* Paste JD Modal */}
       {showAddJdModal && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ position: 'relative' }}>
-            <button className="modal-close" onClick={() => setShowAddJdModal(false)}>×</button>
-            <h3 className="modal-title">Evaluate Job Description</h3>
-            <form onSubmit={handleAddCustomJd} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <div className="form-group">
-                  <label className="form-label">Role Title</label>
-                  <input type="text" className="form-input" value={newJdTitle} onChange={(e) => setNewJdTitle(e.target.value)} placeholder="e.g. Marketing Manager" required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Company</label>
-                  <input type="text" className="form-input" value={newJdCompany} onChange={(e) => setNewJdCompany(e.target.value)} placeholder="e.g. Careem" required />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Location</label>
-                <input type="text" className="form-input" value={newJdLocation} onChange={(e) => setNewJdLocation(e.target.value)} placeholder="e.g. Dubai, UAE (or Remote)" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Paste Job Description Text</label>
-                <textarea className="form-input" style={{ minHeight: 200 }} value={newJdText} onChange={(e) => setNewJdText(e.target.value)} placeholder="Paste the full job requirements, description, and compensation details here..." required />
-              </div>
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', paddingTop: 8 }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <div style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, width: '100%', maxWidth: 550, padding: 24, color: '#fff' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 18, color: '#38bdf8' }}>Paste Custom Job Description</h3>
+            <form onSubmit={handleCustomJdSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <input
+                type="text"
+                placeholder="Job Title (e.g. Marketing Automation Lead)"
+                value={newJdTitle}
+                onChange={(e) => setNewJdTitle(e.target.value)}
+                style={{ padding: 10, borderRadius: 6, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+              />
+              <input
+                type="text"
+                placeholder="Company Name (e.g. Careem, NEOM)"
+                value={newJdCompany}
+                onChange={(e) => setNewJdCompany(e.target.value)}
+                style={{ padding: 10, borderRadius: 6, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+              />
+              <input
+                type="text"
+                placeholder="Location (e.g. Dubai / Riyadh / Bangalore)"
+                value={newJdLocation}
+                onChange={(e) => setNewJdLocation(e.target.value)}
+                style={{ padding: 10, borderRadius: 6, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+              />
+              <textarea
+                placeholder="Paste Full Job Description Text..."
+                rows={8}
+                value={newJdText}
+                onChange={(e) => setNewJdText(e.target.value)}
+                style={{ padding: 10, borderRadius: 6, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'vertical' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowAddJdModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Score Listing</button>
+                <button type="submit" className="btn btn-primary">Score & Evaluate</button>
               </div>
             </form>
           </div>

@@ -15,6 +15,9 @@
 
     <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   </head>
   <body>
     <div id="auth-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#111827;z-index:999999;display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff;font-family:Inter,sans-serif;">
@@ -22,6 +25,7 @@
         <h2 style="margin-top:0;margin-bottom:1.5rem;text-align:center;">Career-Ops Sign In</h2>
         <input type="email" id="auth-id" placeholder="ID (Email)" style="width:100%;padding:0.75rem;margin-bottom:1rem;border-radius:4px;border:1px solid #374151;background:#111827;color:white;box-sizing:border-box;" />
         <input type="password" id="auth-pass" placeholder="Password" style="width:100%;padding:0.75rem;margin-bottom:1rem;border-radius:4px;border:1px solid #374151;background:#111827;color:white;box-sizing:border-box;" />
+        <div class="g-recaptcha" data-sitekey="6Ld4_oYtAAAAAPwqLLcsJWIB2x8Hw1guAZxSoz0C" style="margin-bottom:1rem;display:flex;justify-content:center;"></div>
         <button id="auth-btn" style="width:100%;padding:0.75rem;border-radius:4px;border:none;background:#3b82f6;color:white;font-weight:bold;cursor:pointer;">Sign In</button>
         <p id="auth-error" style="color:#ef4444;margin-top:1rem;text-align:center;display:none;">Invalid credentials</p>
       </div>
@@ -31,13 +35,23 @@
       if (sessionStorage.getItem('authenticated') !== 'true') {
         document.getElementById('auth-overlay').style.display = 'flex';
         document.getElementById('auth-btn').onclick = function() {
+          var err = document.getElementById('auth-error');
           var id = document.getElementById('auth-id').value;
           var pass = document.getElementById('auth-pass').value;
+          var recaptchaResp = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
+
+          if (!recaptchaResp) {
+            err.innerText = 'Please complete the reCAPTCHA verification.';
+            err.style.display = 'block';
+            return;
+          }
+
           if (id === '6vinay9@gmail.com' && pass === '#g0!ng2AUS') {
             sessionStorage.setItem('authenticated', 'true');
             document.getElementById('auth-overlay').style.display = 'none';
           } else {
-            document.getElementById('auth-error').style.display = 'block';
+            err.innerText = 'Invalid credentials';
+            err.style.display = 'block';
           }
         };
       }

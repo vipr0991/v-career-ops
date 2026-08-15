@@ -1,263 +1,466 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 const STAGES = [
-  { key: 'new',        label: 'New',        color: '#64748b', icon: 'fiber_new' },
-  { key: 'evaluating', label: 'Evaluating', color: '#6366f1', icon: 'manage_search' },
-  { key: 'scored',     label: 'Scored',     color: '#06b6d4', icon: 'insights' },
-  { key: 'applied',    label: 'Applied',    color: '#f59e0b', icon: 'send' },
-  { key: 'interview',  label: 'Interview',  color: '#8b5cf6', icon: 'groups' },
-  { key: 'offer',      label: 'Offer',      color: '#10b981', icon: 'workspace_premium' },
+  { key: 'all', label: 'All Jobs', color: '#3b82f6', icon: 'list' },
+  { key: 'pipeline_saved', label: 'Saved / Qualified', color: '#06b6d4', icon: 'bookmark' },
+  { key: 'assets_generated', label: 'Kit Ready (PPTX/LaTeX)', color: '#8b5cf6', icon: 'inventory' },
+  { key: 'outreach_active', label: 'Outreach Active', color: '#f59e0b', icon: 'send' },
+  { key: 'interviewing', label: 'Interviewing', color: '#10b981', icon: 'groups' },
 ]
 
-const STAGE_KEYS = STAGES.map(s => s.key)
-
-// Persist pipeline state in localStorage so status changes survive reload
-function loadPipelineOverrides() {
-  try { return JSON.parse(localStorage.getItem('pipeline_overrides') || '{}') } catch { return {} }
-}
-function savePipelineOverrides(overrides) {
-  try { localStorage.setItem('pipeline_overrides', JSON.stringify(overrides)) } catch {}
-}
-
-export default function PipelinePage({ jobs, addToast, onRefresh }) {
+export default function PipelinePage({ addToast, onRefresh }) {
   const [items, setItems] = useState([])
-  const [overrides, setOverrides] = useState(loadPipelineOverrides)
-  const [filterStage, setFilterStage] = useState('all')
-  const [dragId, setDragId] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [activeStage, setActiveStage] = useState('all')
+  const [locationFilter, setLocationFilter] = useState('All')
+  const [generatingKitId, setGeneratingKitId] = useState(null)
+  const [selectedItemModal, setSelectedItemModal] = useState(null)
 
-  // Build items from scored jobs + apply any status overrides
-  useEffect(() => {
-    const built = (jobs || []).map(job => {
-      const base = overrides[job.id]?.status
-      return {
-        id: job.id,
-        role: job.role || job.title || 'Untitled',
-        company: job.company || 'Unknown',
-        score: job.score,
-        status: base || (job.score != null ? 'scored' : 'new'),
-        date: job.report_file ? job.report_file.split('-').slice(1, 4).join('-') : '',
-        report_file: job.report_file,
+  const fetchPipeline = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/pipeline`)
+      if (res.ok) {
+        const data = await res.json()
+        setItems(data.items || [])
       }
-    })
-    setItems(built)
-  }, [jobs, overrides])
+    } catch {
+      addToast('Could not load pipeline data', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }, [addToast])
 
-  const updateStatus = (id, newStatus) => {
-    const next = { ...overrides, [id]: { ...(overrides[id] || {}), status: newStatus } }
-    setOverrides(next)
-    savePipelineOverrides(next)
-    setItems(prev => prev.map(it => it.id === id ? { ...it, status: newStatus } : it))
-    // best-effort backend sync
-    fetch(`${API_BASE}/api/pipeline/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    }).catch(() => {})
-    addToast(`Moved to ${newStatus}`, 'success')
+  useEffect(() => {
+    fetchPipeline()
+  }, [fetchPipeline])
+
+  const updateStage = async (id, newStage) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/pipeline/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStage }),
+      })
+      if (res.ok) {
+        setItems(prev => prev.map(it => it.id === id ? { ...it, stage: newStage } : it))
+        addToast(`Stage updated to ${newStage}`, 'success')
+      }
+    } catch {
+      addToast('Failed to update stage', 'error')
+    }
   }
 
-  const deleteItem = (id) => {
-    if (!window.confirm('Remove from pipeline?')) return
-    const next = { ...overrides }
-    delete next[id]
-    setOverrides(next)
-    savePipelineOverrides(next)
-    setItems(prev => prev.filter(it => it.id !== id))
-    addToast('Removed from pipeline', 'info')
+  const deleteItem = async (id) => {
+    if (!window.confirm('Remove this opportunity from your active pipeline?')) return
+    try {
+      const res = await fetch(`${API_BASE}/api/pipeline?item_id=${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        setItems(prev => prev.filter(it => it.id !== id))
+        addToast('Removed from pipeline', 'success')
+      }
+    } catch {
+      addToast('Failed to delete item', 'error')
+    }
   }
 
-  // Drag-and-drop between columns
-  const onDragStart = (id) => setDragId(id)
-  const onDrop = (stageKey) => {
-    if (dragId) { updateStatus(dragId, stageKey); setDragId(null) }
+  const generateKit = async (id) => {
+    setGeneratingKitId(id)
+    addToast('Generating Company Intelligence, LaTeX Resume & 6-Slide PPTX Deck...', 'info')
+    try {
+      const res = await fetch(`${API_BASE}/api/pipeline/generate-kit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id: id }),
+      })
+      if (res.ok) {
+        const result = await res.json()
+        setItems(prev => prev.map(it => it.id === id ? result.pipeline_item : it))
+        setSelectedItemModal(result.pipeline_item)
+        addToast('Application Kit (LaTeX + PPTX + Research) Ready!', 'success')
+      } else {
+        addToast('Kit generation failed', 'error')
+      }
+    } catch {
+      addToast('Network error during kit generation', 'error')
+    } finally {
+      setGeneratingKitId(null)
+    }
   }
 
-  const counts = STAGE_KEYS.reduce((acc, k) => ({ ...acc, [k]: items.filter(i => i.status === k).length }), {})
-  const total = items.length || 1
-
-  const filtered = filterStage === 'all' ? items : items.filter(i => i.status === filterStage)
+  const filteredItems = items.filter(it => {
+    const stageMatch = activeStage === 'all' || it.stage === activeStage
+    const locMatch = locationFilter === 'All' || (it.location || '').toLowerCase().includes(locationFilter.toLowerCase())
+    return stageMatch && locMatch
+  })
 
   return (
-    <div className="page-content" id="pipeline-page">
-      {/* Header */}
-      <div className="panel">
-        <div className="panel-header">
-          <div className="panel-title">
-            <span className="material-symbols-outlined" style={{ color: 'var(--accent-primary-light)' }}>view_kanban</span>
-            Application Pipeline
-          </div>
-          <span className="section-count">{items.length} Total</span>
+    <div className="page-container" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+            Job Pipeline & Application Command Center
+          </h1>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0 }}>
+            Track opportunities, generate company research briefs, customized LaTeX resumes, and executive PowerPoint decks.
+          </p>
+        </div>
+        <button className="btn btn-secondary btn-sm" onClick={fetchPipeline} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>sync</span>
+          {loading ? 'Refreshing...' : 'Refresh Pipeline'}
+        </button>
+      </div>
+
+      {/* Filter Tabs & Location Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+        {/* Stage Filter */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {STAGES.map(s => {
+            const count = s.key === 'all' ? items.length : items.filter(x => x.stage === s.key).length
+            const isActive = activeStage === s.key
+            return (
+              <button
+                key={s.key}
+                onClick={() => setActiveStage(s.key)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 14px',
+                  borderRadius: '20px',
+                  border: isActive ? `1px solid ${s.color}` : '1px solid rgba(255,255,255,0.08)',
+                  background: isActive ? `${s.color}22` : 'rgba(255,255,255,0.03)',
+                  color: isActive ? '#fff' : 'var(--text-secondary)',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  fontWeight: isActive ? '600' : 'normal'
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 16, color: s.color }}>{s.icon}</span>
+                {s.label}
+                <span style={{ fontSize: 11, background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 10 }}>
+                  {count}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
-        {/* Progress bar */}
-        <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', gap: 2, margin: '12px 0' }}>
-          {STAGES.map(s => (
-            <div key={s.key} style={{ width: `${(counts[s.key] / total) * 100}%`, background: s.color, transition: 'width 0.3s' }} title={`${s.label}: ${counts[s.key]}`} />
-          ))}
-        </div>
-
-        {/* Stage filter chips */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <button className={`filter-chip ${filterStage === 'all' ? 'active' : ''}`} onClick={() => setFilterStage('all')}>
-            All <strong style={{ marginLeft: 4 }}>{items.length}</strong>
-          </button>
-          {STAGES.map(s => (
-            <button key={s.key} className={`filter-chip ${filterStage === s.key ? 'active' : ''}`} onClick={() => setFilterStage(s.key)}>
-              <span className="material-symbols-outlined" style={{ fontSize: 13, color: s.color }}>{s.icon}</span>
-              {s.label} <strong style={{ marginLeft: 4 }}>{counts[s.key]}</strong>
-            </button>
-          ))}
+        {/* Location Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--text-secondary)' }}>travel_explore</span>
+          <select
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: '#1e293b',
+              color: '#fff',
+              fontSize: '13px',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="All">All Locations</option>
+            <option value="UAE">UAE (Dubai / Abu Dhabi)</option>
+            <option value="Saudi">Saudi Arabia (Riyadh / NEOM)</option>
+            <option value="Qatar">Qatar (Doha)</option>
+            <option value="Bahrain">Bahrain</option>
+            <option value="Oman">Oman</option>
+            <option value="Kuwait">Kuwait</option>
+            <option value="Bangalore">Bangalore (India)</option>
+          </select>
         </div>
       </div>
 
-      {/* Kanban columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12, marginTop: 16, overflowX: 'auto' }}>
-        {STAGES.map(stage => (
-          <div
-            key={stage.key}
-            onDragOver={e => e.preventDefault()}
-            onDrop={() => onDrop(stage.key)}
-            style={{
-              background: 'var(--bg-card)',
-              border: `1px solid ${dragId ? stage.color + '55' : 'var(--border-subtle)'}`,
-              borderRadius: 'var(--radius-lg)',
-              padding: 12,
-              minHeight: 200,
-              transition: 'border-color 0.2s',
-            }}
-          >
-            {/* Column header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16, color: stage.color }}>{stage.icon}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: stage.color }}>{stage.label}</span>
-              <span style={{ marginLeft: 'auto', background: stage.color + '22', color: stage.color, fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 12 }}>
-                {counts[stage.key]}
-              </span>
-            </div>
+      {/* Grid of Pipeline Cards */}
+      {filteredItems.length === 0 ? (
+        <div style={{ padding: '60px 20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px dashed rgba(255,255,255,0.1)' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--text-secondary)', marginBottom: 12 }}>inbox</span>
+          <h3 style={{ margin: '0 0 8px', fontSize: 16, color: 'var(--text-primary)' }}>No opportunities found in this view</h3>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>
+            Search jobs in the <strong>Jobs</strong> tab or adjust your location and stage filters.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '16px' }}>
+          {filteredItems.map(item => {
+            const scoreVal = typeof item.score === 'object' ? item.score?.overall_score : item.score
+            const isKitGenerating = generatingKitId === item.id
+            const hasKit = item.presentation_deck || item.tailored_resume_tex || item.company_research
 
-            {/* Cards */}
-            {items.filter(it => it.status === stage.key).map(item => (
+            return (
               <div
                 key={item.id}
-                draggable
-                onDragStart={() => onDragStart(item.id)}
                 style={{
-                  background: 'var(--bg-glass)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 12px',
-                  marginBottom: 8,
-                  cursor: 'grab',
-                  transition: 'transform 0.15s, box-shadow 0.15s',
+                  background: 'rgba(30, 41, 59, 0.7)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  position: 'relative'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
               >
-                <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2 }}>{item.role}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{item.company}</div>
-                {item.score != null && (
-                  <div style={{ fontSize: 11, fontWeight: 600, color: item.score >= 70 ? 'var(--accent-success)' : item.score >= 45 ? 'var(--accent-warning)' : 'var(--accent-danger)', marginBottom: 6 }}>
-                    {Math.round(item.score)}% match
+                {/* Header: Title & Score Badge */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 'bold', color: '#fff' }}>
+                      {item.title}
+                    </h3>
+                    <div style={{ fontSize: '14px', color: '#38bdf8', fontWeight: '500' }}>
+                      {item.company}
+                    </div>
                   </div>
-                )}
+                  {scoreVal != null && (
+                    <div style={{
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      background: scoreVal >= 85 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                      border: scoreVal >= 85 ? '1px solid #10b981' : '1px solid #3b82f6',
+                      color: scoreVal >= 85 ? '#10b981' : '#3b82f6',
+                      fontWeight: 'bold',
+                      fontSize: '13px'
+                    }}>
+                      {scoreVal}% Match
+                    </div>
+                  )}
+                </div>
 
-                {/* Move to next stage */}
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
-                  {STAGE_KEYS.filter(k => k !== stage.key).map(k => {
-                    const s = STAGES.find(x => x.key === k)
-                    return (
-                      <button
-                        key={k}
-                        onClick={() => updateStatus(item.id, k)}
-                        title={`Move to ${s.label}`}
-                        style={{
-                          background: s.color + '18', color: s.color, border: `1px solid ${s.color}44`,
-                          borderRadius: 4, padding: '2px 6px', fontSize: 10, cursor: 'pointer',
-                        }}
-                      >
-                        {s.label}
-                      </button>
-                    )
-                  })}
+                {/* Location & Salary Chips */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', padding: '3px 8px', borderRadius: 4 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>location_on</span>
+                    {item.location}
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', padding: '3px 8px', borderRadius: 4 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>payments</span>
+                    {item.salary_range}
+                  </span>
+                </div>
+
+                {/* Stage Selector Dropdown */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 12 }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Stage:</span>
+                  <select
+                    value={item.stage}
+                    onChange={(e) => updateStage(item.id, e.target.value)}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      background: '#0f172a',
+                      color: '#38bdf8',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="pipeline_saved">Saved / Qualified</option>
+                    <option value="assets_generated">Kit Ready</option>
+                    <option value="outreach_active">Outreach Active</option>
+                    <option value="interviewing">Interviewing</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 'auto', flexWrap: 'wrap' }}>
                   <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => generateKit(item.id)}
+                    disabled={isKitGenerating}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: '12px' }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                      {hasKit ? 'auto_fix_high' : 'bolt'}
+                    </span>
+                    {isKitGenerating ? 'Synthesizing Kit...' : hasKit ? 'Regenerate Kit' : '1-Click App Kit'}
+                  </button>
+
+                  {hasKit && (
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setSelectedItemModal(item)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '12px' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
+                      View Assets
+                    </button>
+                  )}
+
+                  <button
+                    className="btn btn-secondary btn-sm"
                     onClick={() => deleteItem(item.id)}
-                    style={{ background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)', borderRadius: 4, padding: '2px 6px', fontSize: 10, cursor: 'pointer', marginLeft: 'auto' }}
-                  >✕</button>
+                    title="Remove from pipeline"
+                    style={{ color: '#ef4444' }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+                  </button>
                 </div>
               </div>
-            ))}
+            )
+          })}
+        </div>
+      )}
 
-            {items.filter(it => it.status === stage.key).length === 0 && (
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, padding: '20px 0', borderRadius: 8, border: '1px dashed var(--border-subtle)' }}>
-                Drop cards here
+      {/* Asset Inspection Modal */}
+      {selectedItemModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.75)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setSelectedItemModal(null)}
+        >
+          <div
+            style={{
+              background: '#0f172a',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '850px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '28px',
+              color: '#fff'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: '0 0 4px', fontSize: '20px', color: '#38bdf8' }}>
+                  Application Kit: {selectedItemModal.title}
+                </h2>
+                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  {selectedItemModal.company} • {selectedItemModal.location}
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedItemModal(null)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 24 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Generated Downloads Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12, marginBottom: 24 }}>
+              {selectedItemModal.presentation_deck && (
+                <a
+                  href={`${API_BASE}/api/downloads/output/${selectedItemModal.presentation_deck}`}
+                  download
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '12px 16px',
+                    borderRadius: 8,
+                    background: 'rgba(59, 130, 246, 0.15)',
+                    border: '1px solid #3b82f6',
+                    color: '#60a5fa',
+                    textDecoration: 'none',
+                    fontSize: '13px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  <span className="material-symbols-outlined">slideshow</span>
+                  Download 6-Slide PPTX Deck
+                </a>
+              )}
+
+              {selectedItemModal.tailored_resume_tex && (
+                <a
+                  href={`${API_BASE}/api/downloads/latex/${selectedItemModal.tailored_resume_tex}`}
+                  download
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '12px 16px',
+                    borderRadius: 8,
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid #10b981',
+                    color: '#34d399',
+                    textDecoration: 'none',
+                    fontSize: '13px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  <span className="material-symbols-outlined">description</span>
+                  Download Tailored LaTeX (.tex)
+                </a>
+              )}
+            </div>
+
+            {/* Decision Makers & LinkedIn Notes */}
+            {selectedItemModal.decision_makers && selectedItemModal.decision_makers.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: 16, color: '#38bdf8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span className="material-symbols-outlined">group</span>
+                  Decision Makers & LinkedIn Invites (200-char max)
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {selectedItemModal.decision_makers.map((dm, idx) => (
+                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#fff' }}>{dm.target_title}</span>
+                        <a href={dm.linkedin_search_url} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#38bdf8', textDecoration: 'none' }}>
+                          Search on LinkedIn ↗
+                        </a>
+                      </div>
+                      <p style={{ margin: '0 0 6px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <strong>Relevance:</strong> {dm.relevance}
+                      </p>
+                      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: 6, fontSize: '12px', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        "{dm.outreach_note_200_char}"
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Company Intelligence Summary */}
+            {selectedItemModal.company_research && (
+              <div>
+                <h3 style={{ fontSize: 16, color: '#38bdf8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span className="material-symbols-outlined">insights</span>
+                  Strategic Intelligence & Pitch Solutions
+                </h3>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: 8, fontSize: '13px', lineHeight: '1.6', color: '#cbd5e1' }}>
+                  <p><strong>Business Model:</strong> {selectedItemModal.company_research.business_model}</p>
+                  <p><strong>Identified Pain Points:</strong> {(selectedItemModal.company_research.strategic_pain_points || []).join(' ')}</p>
+                  <p><strong>Solutions to Pitch:</strong></p>
+                  <ul style={{ margin: 0, paddingLeft: 20 }}>
+                    {(selectedItemModal.company_research.candidate_solutions_to_pitch || []).map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
           </div>
-        ))}
-      </div>
-
-      {/* List view */}
-      <div className="panel" style={{ marginTop: 24 }}>
-        <div className="panel-header">
-          <div className="panel-title">
-            <span className="material-symbols-outlined" style={{ color: 'var(--accent-secondary)' }}>list</span>
-            All Applications
-          </div>
         </div>
-        {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-muted)', fontSize: 13 }}>
-            No items. Score jobs on the Jobs page to populate the pipeline.
-          </div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                {['Role', 'Company', 'Score', 'Stage', 'Date', 'Move To', ''].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, fontSize: 11 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(item => {
-                const stage = STAGES.find(s => s.key === item.status) || STAGES[0]
-                const nextStageKey = STAGE_KEYS[STAGE_KEYS.indexOf(item.status) + 1]
-                const nextStage = STAGES.find(s => s.key === nextStageKey)
-                return (
-                  <tr key={item.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                    <td style={{ padding: '10px 12px', fontWeight: 600 }}>{item.role}</td>
-                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{item.company}</td>
-                    <td style={{ padding: '10px 12px' }}>
-                      {item.score != null
-                        ? <span style={{ fontWeight: 700, color: item.score >= 70 ? 'var(--accent-success)' : item.score >= 45 ? 'var(--accent-warning)' : 'var(--accent-danger)' }}>{Math.round(item.score)}%</span>
-                        : <span style={{ color: 'var(--text-muted)' }}>—</span>}
-                    </td>
-                    <td style={{ padding: '10px 12px' }}>
-                      <span style={{ background: stage.color + '22', color: stage.color, padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>
-                        {stage.label}
-                      </span>
-                    </td>
-                    <td style={{ padding: '10px 12px', fontSize: 11, color: 'var(--text-muted)' }}>{item.date || '—'}</td>
-                    <td style={{ padding: '10px 12px' }}>
-                      <select
-                        value={item.status}
-                        onChange={e => updateStatus(item.id, e.target.value)}
-                        style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: 6, padding: '4px 8px', fontSize: 11, cursor: 'pointer' }}
-                      >
-                        {STAGES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
-                      </select>
-                    </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>
-                      <button onClick={() => deleteItem(item.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>✕</button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+      )}
     </div>
   )
 }
