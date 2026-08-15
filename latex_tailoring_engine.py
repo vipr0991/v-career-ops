@@ -8,6 +8,8 @@ import re
 import httpx
 from typing import Dict, Any, Optional
 
+from resume_namer import resume_namer
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 LATEX_DIR = os.path.join(BASE_DIR, "latex_resumes")
@@ -40,8 +42,7 @@ class LatexTailoringEngine:
         Saves .tex file in latex_resumes/ and returns paths.
         """
         template_raw = self._load_template()
-        company_slug = "".join(c.lower() if c.isalnum() else "-" for c in (company_name or "target")).strip("-")
-        tex_filename = f"resume-{company_slug}-{int(time.time())}.tex"
+        tex_filename = resume_namer.generate_filename(company_name or "Target", extension="tex", candidate_name="Vinay")
         tex_path = os.path.join(LATEX_DIR, tex_filename)
 
         if not self.gemini_key or not template_raw:

@@ -597,21 +597,28 @@ async def remove_exclusion_endpoint(item_id: str):
 
 @app.get("/api/downloads/{file_type}/{filename}")
 async def download_file(file_type: str, filename: str):
-    """Download generated PPTX decks, LaTeX resumes, or compiled PDFs."""
+    """Download generated PPTX decks, LaTeX resumes, or compiled PDFs with standardized naming."""
     target_path = ""
     if file_type == "latex":
-        if filename.endswith(".pdf"):
-            target_path = os.path.join(OUTPUT_DIR, filename)
-            if not os.path.exists(target_path):
-                comp = filename.replace("resume-", "").replace(".pdf", "")
-                target_path = pdf_compiler.compile_resume_to_pdf("Senior Marketing Manager", comp)
-        else:
-            target_path = os.path.join(LATEX_DIR, filename)
+        target_path = os.path.join(LATEX_DIR, filename)
+        if not os.path.exists(target_path):
+            # Extract company name
+            if "_" in filename:
+                parts = filename.replace(".tex", "").split("_")
+                comp = parts[2] if len(parts) >= 3 else parts[-1]
+            else:
+                comp = filename.replace("resume-", "").replace(".tex", "")
+            tex_res = await latex_tailor.generate_tailored_resume("Senior Marketing Manager", comp, "")
+            target_path = tex_res.get("tex_path")
     elif file_type == "pdf":
         target_path = os.path.join(OUTPUT_DIR, filename)
         if not os.path.exists(target_path):
-            comp = filename.replace("resume-", "").replace(".pdf", "")
-            target_path = pdf_compiler.compile_resume_to_pdf("Senior Marketing Manager", comp)
+            if "_" in filename:
+                parts = filename.replace(".pdf", "").split("_")
+                comp = parts[2] if len(parts) >= 3 else parts[-1]
+            else:
+                comp = filename.replace("resume-", "").replace(".pdf", "")
+            target_path = pdf_compiler.compile_resume_to_pdf("Senior Marketing Manager", comp, custom_filename=filename)
     else:
         target_path = os.path.join(OUTPUT_DIR, filename)
 

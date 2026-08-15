@@ -12,6 +12,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable,
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 
+from resume_namer import resume_namer
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -25,14 +27,17 @@ class PDFCompiler:
         job_title: str,
         company_name: str,
         latex_content: Optional[str] = None,
-        candidate_name: str = "Vinay Prakash"
+        candidate_name: str = "Vinay Prakash",
+        custom_filename: Optional[str] = None
     ) -> str:
         """
         Compiles tailored resume content into an ATS-friendly, professional PDF file.
         Returns the absolute filepath of the generated PDF.
         """
-        company_slug = "".join(c.lower() if c.isalnum() else "-" for c in (company_name or "target")).strip("-")
-        pdf_filename = f"resume-{company_slug}-{int(time.time())}.pdf"
+        if custom_filename:
+            pdf_filename = custom_filename
+        else:
+            pdf_filename = resume_namer.generate_filename(company_name or "Target", extension="pdf", candidate_name="Vinay")
         pdf_path = os.path.join(self.output_dir, pdf_filename)
 
         doc = SimpleDocTemplate(
