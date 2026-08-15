@@ -555,12 +555,23 @@ app.mount("/resumes", StaticFiles(directory=RESUMES_DIR), name="resumes")
 # â”€â”€ Resume Active Selection (persistent across sessions) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _active_resume_store_path = os.path.join(BASE_DIR, "data", "active_resume.json")
 
+# Master source of truth — used as fallback when no resume is explicitly selected
+MASTER_RESUME_BASENAME = "Vinay_Prakash_Resume_Optimized_6.8"
+
 def _get_active_resume() -> Optional[str]:
     try:
         with open(_active_resume_store_path, "r") as f:
-            return json.load(f).get("filename")
+            fname = json.load(f).get("filename")
+            if fname:
+                return fname
     except Exception:
-        return None
+        pass
+    # Fallback: auto-detect the master resume in resumes/
+    for ext in (".tex", ".docx", ".pdf"):
+        candidate = MASTER_RESUME_BASENAME + ext
+        if os.path.exists(os.path.join(RESUMES_DIR, candidate)):
+            return candidate
+    return None
 
 def _set_active_resume(filename: Optional[str]):
     os.makedirs(os.path.dirname(_active_resume_store_path), exist_ok=True)
@@ -725,10 +736,16 @@ async def generate_application_kit(req: GenerateKitRequest):
     active_file = _get_active_resume()
     if active_file:
         fpath = os.path.join(RESUMES_DIR, os.path.basename(active_file))
-        if os.path.exists(fpath) and fpath.endswith(".tex"):
+        if os.path.exists(fpath):
             try:
-                with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                    active_resume_content = f.read()
+                if fpath.endswith(".tex"):
+                    with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                        active_resume_content = f.read()
+                elif fpath.endswith((".pdf", ".docx", ".doc")):
+                    active_resume_content = (
+                        f"[Uploaded resume '{active_file}' is a {fpath.split('.')[-1].upper()} file. "
+                        f"Use the cv-template.tex below as the verified experience source and tailor it.]"
+                    )
             except Exception:
                 pass
 
