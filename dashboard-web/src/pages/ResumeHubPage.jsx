@@ -565,10 +565,16 @@ export default function ResumeHubPage({ jobs, onOptimizeResume, addToast }) {
                     Compile on <a href="https://www.overleaf.com" target="_blank" rel="noopener noreferrer" style={{color:'var(--accent-primary-light)'}}>Overleaf</a>
                     {' '}or locally: <code>pdflatex resume.tex</code>
                   </span>
-                  <button onClick={()=>{navigator.clipboard.writeText(latex);addToast('Copied!','success')}} className="btn btn-secondary btn-sm">
-                    <span className="material-symbols-outlined" style={{fontSize:13}}>content_copy</span> Copy
-                  </button>
-                  <button onClick={downloadLatex} className="btn btn-primary btn-sm">
+                  <a
+                    href={`${API_BASE}/api/downloads/pdf/resume-${(targetCompany || 'target').toLowerCase().replace(/[^a-z0-9]/g, '-')}.pdf`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-primary btn-sm"
+                    style={{ background: '#ef4444', borderColor: '#dc2626', color: '#fff', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 13 }}>picture_as_pdf</span> Download PDF
+                  </a>
+                  <button onClick={downloadLatex} className="btn btn-secondary btn-sm">
                     <span className="material-symbols-outlined" style={{fontSize:13}}>download</span> .tex
                   </button>
                 </div>

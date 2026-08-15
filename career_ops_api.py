@@ -21,12 +21,14 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
 
-from pipeline_manager import pipeline_store
+from pipeline_manager import pipeline_store, exclusion_store
 from direct_scoring import get_scoring_client
 from company_research import company_researcher
 from presentation_generator import presentation_engine
 from latex_tailoring_engine import latex_tailor
 from linkedin_outreach import linkedin_outreach
+from link_verifier import link_verifier
+from pdf_compiler import pdf_compiler
 
 load_dotenv()
 
@@ -107,6 +109,12 @@ class InviteRequest(BaseModel):
     recipient_name: str
     company_name: str
     job_title: str
+
+class ExcludeJobRequest(BaseModel):
+    company: str
+    title: str
+    url: Optional[str] = ""
+    reason: Optional[str] = "User excluded"
 
 class ChatRequest(BaseModel):
     message: str
@@ -296,16 +304,24 @@ async def search_live_jobs(req: SearchRequest):
             "score": s.get("score")
         })
 
-    # Return deduplicated search listings with sendable links
+    # Deduplicate and filter out permanently excluded jobs
     seen = set()
     deduped = []
     for item in results:
-        key = f"{item['company'].lower().strip()}_{item['title'].lower().strip()}"
+        comp = item.get("company", "").strip()
+        tit = item.get("title", "").strip()
+        u = item.get("url", "")
+        if exclusion_store.is_excluded(comp, tit, u):
+            continue
+        key = f"{comp.lower()}_{tit.lower()}"
         if key not in seen:
             seen.add(key)
             deduped.append(item)
 
-    return {"results": deduped[:req.limit], "total": len(deduped), "location": req.location}
+    # Verify links and filter out dead/expired jobs
+    verified_results = await link_verifier.filter_and_verify_jobs(deduped[:req.limit])
+
+    return {"results": verified_results, "total": len(verified_results), "location": req.location}
 
 # ── 10-Dimension Line-by-Line AI Scoring ─────────────────────────────────────
 
@@ -485,8 +501,10 @@ async def generate_application_kit(req: GenerateKitRequest):
     # 2. Decision Makers
     decision_makers = await company_researcher.find_decision_makers(company)
 
-    # 3. LaTeX Resume Customization
+    # 3. LaTeX Resume Customization & PDF Compilation
     tex_res = await latex_tailor.generate_tailored_resume(title, company, jd, score_data)
+    pdf_path = pdf_compiler.compile_resume_to_pdf(title, company, tex_res.get("tex_code"), "Vinay Prakash")
+    pdf_filename = os.path.basename(pdf_path)
 
     # 4. PowerPoint Presentation Deck Generation
     pptx_path = presentation_engine.generate_value_prop_deck(company, title, research)
@@ -502,6 +520,7 @@ async def generate_application_kit(req: GenerateKitRequest):
         "company_research": research,
         "decision_makers": decision_makers,
         "tailored_resume_tex": tex_res.get("tex_filename"),
+        "tailored_resume_pdf": pdf_filename,
         "presentation_deck": pptx_filename,
         "linkedin_outreach": {
             "status": "prepared",
@@ -515,6 +534,7 @@ async def generate_application_kit(req: GenerateKitRequest):
         "company_research": research,
         "decision_makers": decision_makers,
         "tailored_resume": tex_res,
+        "tailored_resume_pdf": pdf_filename,
         "presentation_deck": pptx_filename,
         "pipeline_item": updated_item
     }
@@ -543,13 +563,57 @@ async def generate_invite_endpoint(req: InviteRequest):
     )
     return {"invite_note": note, "char_count": len(note), "max_limit": 200}
 
+# ── Job Exclusion & Removal Endpoints ────────────────────────────────────────
+
+@app.post("/api/jobs/exclude")
+async def exclude_job_endpoint(req: ExcludeJobRequest):
+    """Permanently exclude a job so it is never resurfaced or recommended."""
+    entry = exclusion_store.add_exclusion(
+        company=req.company,
+        title=req.title,
+        url=req.url or "",
+        reason=req.reason or "User excluded"
+    )
+    # Remove from pipeline if present
+    items = pipeline_store.get_all()
+    for it in items:
+        if exclusion_store.is_excluded(it.get("company", ""), it.get("title", ""), it.get("url", "")):
+            pipeline_store.delete_item(it.get("id"))
+    return {"status": "success", "excluded_item": entry}
+
+@app.get("/api/jobs/excluded")
+async def get_excluded_jobs_endpoint():
+    """Retrieve all permanently excluded job signatures."""
+    items = exclusion_store.get_all()
+    return {"excluded_jobs": items, "total": len(items)}
+
+@app.delete("/api/jobs/exclude/{item_id}")
+async def remove_exclusion_endpoint(item_id: str):
+    """Restore an excluded job if desired."""
+    res = exclusion_store.remove_exclusion(item_id)
+    return {"status": "success" if res else "not_found"}
+
 # ── Direct Download Endpoints ────────────────────────────────────────────────
 
 @app.get("/api/downloads/{file_type}/{filename}")
 async def download_file(file_type: str, filename: str):
-    """Download generated PPTX decks, LaTeX resumes, or outputs."""
-    target_dir = LATEX_DIR if file_type == "latex" else OUTPUT_DIR
-    target_path = os.path.join(target_dir, filename)
+    """Download generated PPTX decks, LaTeX resumes, or compiled PDFs."""
+    target_path = ""
+    if file_type == "latex":
+        if filename.endswith(".pdf"):
+            target_path = os.path.join(OUTPUT_DIR, filename)
+            if not os.path.exists(target_path):
+                comp = filename.replace("resume-", "").replace(".pdf", "")
+                target_path = pdf_compiler.compile_resume_to_pdf("Senior Marketing Manager", comp)
+        else:
+            target_path = os.path.join(LATEX_DIR, filename)
+    elif file_type == "pdf":
+        target_path = os.path.join(OUTPUT_DIR, filename)
+        if not os.path.exists(target_path):
+            comp = filename.replace("resume-", "").replace(".pdf", "")
+            target_path = pdf_compiler.compile_resume_to_pdf("Senior Marketing Manager", comp)
+    else:
+        target_path = os.path.join(OUTPUT_DIR, filename)
 
     if not os.path.exists(target_path) or not os.path.isfile(target_path):
         raise HTTPException(404, f"File {filename} not found")

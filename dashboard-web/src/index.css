@@ -2810,13 +2810,25 @@ textarea.form-input:focus {
   }
   .job-card-actions-row {
     flex-wrap: wrap;
+    gap: 6px;
   }
   .job-action-score, .job-action-report {
     width: 100%;
+    min-height: 40px;
   }
-  .job-action-save, .job-action-tailor, .job-action-apply {
+  .job-action-save, .job-action-tailor, .job-action-apply, .job-action-pdf, .job-action-exclude {
     flex: 1;
+    min-height: 38px;
     justify-content: center;
+  }
+  .job-card-title {
+    font-size: clamp(14px, 4vw, 17px);
+  }
+  .job-card-desc {
+    font-size: clamp(11.5px, 3.2vw, 13px);
+  }
+  .section-title {
+    font-size: clamp(16px, 4.5vw, 20px);
   }
 }
 

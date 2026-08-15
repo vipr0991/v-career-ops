@@ -1,6 +1,6 @@
 """
-Career-Ops Pipeline Manager
-Handles persistent job tracking, deduplication, stages, and document kit associations.
+Career-Ops Pipeline Manager & Long-Term Exclusion Memory
+Handles persistent job tracking, deduplication, stages, document kit associations, and permanent exclusion memory.
 """
 import os
 import json
@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Any
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 PIPELINE_FILE = os.path.join(DATA_DIR, "pipeline_store.json")
+EXCLUSIONS_FILE = os.path.join(DATA_DIR, "excluded_jobs.json")
 
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -29,7 +30,92 @@ STAGES = [
 def normalize_text(text: str) -> str:
     if not text:
         return ""
-    return re.sub(r'[^a-z0-9]', '', text.lower())
+    return re.sub(r'[^a-z0-9]', '', str(text).lower())
+
+class ExclusionStore:
+    def __init__(self, storage_path: str = EXCLUSIONS_FILE):
+        self.storage_path = storage_path
+        self._ensure_storage()
+
+    def _ensure_storage(self):
+        if not os.path.exists(self.storage_path):
+            self._save_data({"excluded": [], "updated_at": time.time()})
+
+    def _load_data(self) -> Dict[str, Any]:
+        try:
+            with open(self.storage_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {"excluded": [], "updated_at": time.time()}
+
+    def _save_data(self, data: Dict[str, Any]):
+        data["updated_at"] = time.time()
+        with open(self.storage_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+    def add_exclusion(self, company: str, title: str, url: str = "", reason: str = "User excluded") -> Dict[str, Any]:
+        data = self._load_data()
+        excluded = data.get("excluded", [])
+        
+        norm_company = normalize_text(company)
+        norm_title = normalize_text(title)
+        
+        # Check if already excluded
+        for item in excluded:
+            if item.get("norm_company") == norm_company and item.get("norm_title") == norm_title:
+                return item
+
+        entry = {
+            "id": f"excl-{int(time.time())}-{len(excluded)+1}",
+            "company": company,
+            "title": title,
+            "url": url,
+            "norm_company": norm_company,
+            "norm_title": norm_title,
+            "reason": reason,
+            "excluded_at": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        excluded.insert(0, entry)
+        self._save_data(data)
+        return entry
+
+    def is_excluded(self, company: str, title: str, url: str = "") -> bool:
+        data = self._load_data()
+        excluded = data.get("excluded", [])
+        if not excluded:
+            return False
+
+        norm_c = normalize_text(company)
+        norm_t = normalize_text(title)
+
+        for item in excluded:
+            ex_c = item.get("norm_company", "")
+            ex_t = item.get("norm_title", "")
+            
+            # Exact or high-confidence match on company and title
+            if ex_c and ex_t and ex_c == norm_c and ex_t == norm_t:
+                return True
+            # Match by URL if provided
+            if url and item.get("url") and item.get("url") == url:
+                return True
+            # Company wildcard match if title matches strongly
+            if ex_c and norm_c and (ex_c in norm_c or norm_c in ex_c) and ex_t == norm_t:
+                return True
+
+        return False
+
+    def get_all(self) -> List[Dict[str, Any]]:
+        data = self._load_data()
+        return data.get("excluded", [])
+
+    def remove_exclusion(self, item_id: str) -> bool:
+        data = self._load_data()
+        initial_len = len(data.get("excluded", []))
+        data["excluded"] = [x for x in data.get("excluded", []) if x.get("id") != item_id]
+        if len(data["excluded"]) < initial_len:
+            self._save_data(data)
+            return True
+        return False
 
 class PipelineManager:
     def __init__(self, storage_path: str = PIPELINE_FILE):
@@ -170,5 +256,6 @@ class PipelineManager:
             return True
         return False
 
-# Global Singleton Instance
+# Global Singleton Instances
 pipeline_store = PipelineManager()
+exclusion_store = ExclusionStore()

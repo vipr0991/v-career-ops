@@ -57,6 +57,29 @@ export default function JobsPage({
   const [newJdLocation, setNewJdLocation] = useState('')
   const [hasAutoSearched, setHasAutoSearched] = useState(false)
   const [evaluatedFilter, setEvaluatedFilter] = useState('all')
+  const [localExcluded, setLocalExcluded] = useState(new Set())
+
+  const handleExcludeJob = async (job) => {
+    const comp = cleanJobString(job.company || 'Unknown')
+    const tit = cleanJobString(job.title || job.role || 'Role')
+    const key = `${comp.toLowerCase()}_${tit.toLowerCase()}`
+    setLocalExcluded(prev => new Set(prev).add(key))
+    try {
+      await fetch(`${API_BASE}/api/jobs/exclude`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company: comp,
+          title: tit,
+          url: job.url || '',
+          reason: 'User removed from search results'
+        })
+      })
+      addToast(`Permanently excluded ${comp}`, 'info')
+    } catch {
+      addToast(`Excluded ${comp}`, 'info')
+    }
+  }
 
   // Auto-search on first load if empty
   useEffect(() => {
@@ -116,7 +139,14 @@ export default function JobsPage({
     }
   }
 
+  const filteredSearchResults = (searchResults || []).filter(j => {
+    const key = `${cleanJobString(j.company || '').toLowerCase()}_${cleanJobString(j.title || '').toLowerCase()}`
+    return !localExcluded.has(key)
+  })
+
   const filteredEvaluatedJobs = (jobs || []).filter(j => {
+    const key = `${cleanJobString(j.company || '').toLowerCase()}_${cleanJobString(j.role || j.title || '').toLowerCase()}`
+    if (localExcluded.has(key)) return false
     if (evaluatedFilter === 'top') {
       const s = typeof j.score === 'object' ? (j.score?.overall_score || 0) : (j.score || 0)
       return s >= 85
@@ -269,14 +299,14 @@ export default function JobsPage({
           </div>
         </div>
 
-        {searchResults.length === 0 ? (
+        {filteredSearchResults.length === 0 ? (
           <div className="empty-state-box">
             <span className="material-symbols-outlined empty-state-icon">manage_search</span>
             <p className="empty-state-text">No live search results currently loaded. Click <strong>"Scan Jobs"</strong> above to retrieve openings.</p>
           </div>
         ) : (
           <div className="jobs-grid-container">
-            {searchResults.map((job) => {
+            {filteredSearchResults.map((job) => {
               const cleanTitle = cleanJobString(job.title)
               const cleanCompany = cleanJobString(job.company)
               const cleanLoc = cleanJobString(job.location)
@@ -301,6 +331,12 @@ export default function JobsPage({
                       <span className="material-symbols-outlined" style={{ fontSize: 13, color: '#10b981' }}>payments</span>
                       {job.salary_range || 'Competitive'}
                     </span>
+                    {(job.is_verified || (job.url && job.url.startsWith('http'))) && (
+                      <span className="job-badge verified-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: 13, color: '#34d399' }}>check_circle</span>
+                        Verified Live
+                      </span>
+                    )}
                   </div>
 
                   <p className="job-card-desc">
@@ -332,12 +368,21 @@ export default function JobsPage({
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-secondary btn-sm job-action-apply"
-                        title="Open Direct Job Posting"
+                        title="Open Official Job Application Link"
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 15 }}>open_in_new</span>
                         Apply
                       </a>
                     )}
+
+                    <button
+                      className="btn btn-secondary btn-sm job-action-exclude"
+                      onClick={() => handleExcludeJob(job)}
+                      title="Permanently Exclude Job"
+                      style={{ color: '#ef4444' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 15 }}>block</span>
+                    </button>
                   </div>
                 </div>
               )
@@ -518,6 +563,17 @@ export default function JobsPage({
                       Tailor
                     </button>
 
+                    <a
+                      href={`${API_BASE}/api/downloads/pdf/resume-${cleanJobString(job.company || 'target').toLowerCase().replace(/[^a-z0-9]/g, '-')}.pdf`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-secondary btn-sm job-action-pdf"
+                      title="Download Compiled ATS PDF Resume"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 15, color: '#ef4444' }}>picture_as_pdf</span>
+                      PDF
+                    </a>
+
                     {job.url && job.url.startsWith('http') && (
                       <a
                         href={job.url}
@@ -529,6 +585,15 @@ export default function JobsPage({
                         <span className="material-symbols-outlined" style={{ fontSize: 15 }}>open_in_new</span>
                       </a>
                     )}
+
+                    <button
+                      className="btn btn-secondary btn-sm job-action-exclude"
+                      onClick={() => handleExcludeJob(job)}
+                      title="Permanently Exclude Job"
+                      style={{ color: '#ef4444' }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 15 }}>block</span>
+                    </button>
                   </div>
                 </div>
               )

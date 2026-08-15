@@ -81,6 +81,28 @@ export default function PipelinePage({ addToast, onRefresh }) {
     }
   }
 
+  const handleExcludeItem = async (it) => {
+    const comp = cleanJobString(it.company || 'Unknown')
+    const tit = cleanJobString(it.title || 'Role')
+    if (!window.confirm(`Permanently exclude ${comp} from future searches and pipeline?`)) return
+    try {
+      await fetch(`${API_BASE}/api/jobs/exclude`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company: comp,
+          title: tit,
+          url: it.url || '',
+          reason: 'User excluded from pipeline'
+        })
+      })
+      setItems(prev => prev.filter(x => x.id !== it.id))
+      addToast(`Permanently excluded ${comp}`, 'info')
+    } catch {
+      setItems(prev => prev.filter(x => x.id !== it.id))
+    }
+  }
+
   const generateKit = async (id) => {
     setGeneratingKitId(id)
     addToast('Generating Company Intelligence, LaTeX Resume & 6-Slide PPTX Deck...', 'info')
@@ -290,9 +312,18 @@ export default function PipelinePage({ addToast, onRefresh }) {
                     className="btn btn-secondary btn-sm job-action-apply"
                     onClick={() => deleteItem(item.id)}
                     title="Remove from pipeline"
+                    style={{ color: '#f59e0b' }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>playlist_remove</span>
+                  </button>
+
+                  <button
+                    className="btn btn-secondary btn-sm job-action-exclude"
+                    onClick={() => handleExcludeItem(item)}
+                    title="Permanently Exclude Job"
                     style={{ color: '#ef4444' }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>block</span>
                   </button>
                 </div>
               </div>
@@ -342,6 +373,27 @@ export default function PipelinePage({ addToast, onRefresh }) {
                   Download 6-Slide PPTX Deck
                 </a>
               )}
+
+              <a
+                href={`${API_BASE}/api/downloads/pdf/resume-${cleanJobString(selectedItemModal.company || 'target').toLowerCase().replace(/[^a-z0-9]/g, '-')}.pdf`}
+                download
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid #ef4444',
+                  color: '#f87171',
+                  textDecoration: 'none',
+                  fontSize: 13,
+                  fontWeight: 600
+                }}
+              >
+                <span className="material-symbols-outlined">picture_as_pdf</span>
+                Download Compiled PDF Resume
+              </a>
 
               {selectedItemModal.tailored_resume_tex && (
                 <a
