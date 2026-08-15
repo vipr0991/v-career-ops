@@ -36,3 +36,11 @@ The skill will instruct the agent on the three approved prongs for LinkedIn inte
 - No server-side fetching of `linkedin.com` (except OAuth).
 - Extension requires explicit user click for every network call.
 - Provide a disconnect flow to delete all captured data.
+
+### Authentication & Identity Constraints
+When generating or modifying authentication flows for Career-Ops, strictly adhere to the following identity constraints:
+- **Authorized LinkedIn Account**: The primary and only authorized email for LinkedIn OAuth is `voommen@my.madonna.edu`.
+- **Manual Login Fallback**: The system must always support manual email/password fallback login for the following two accounts:
+  1. `6vinay9@gmail.com`
+  2. `voommen@my.madonna.edu`
+- **Forgot Password**: The "Forgot Password" UI must only trigger and acknowledge the university account (`voommen@my.madonna.edu`). All other emails must be rejected by the forgot password logic.
