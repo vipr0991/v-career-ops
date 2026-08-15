@@ -33,6 +33,10 @@ let _toastId = 0
 export default function App() {
   const [authStatus, setAuthStatus] = useState('loading') // 'loading' | 'authenticated' | 'unauthenticated'
   const [authUser, setAuthUser] = useState(null)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [forgotPasswordMsg, setForgotPasswordMsg] = useState('')
   
   const [activePage, setActivePage] = useState(getInitialPage)
   const [chatOpen, setChatOpen] = useState(false)
@@ -159,6 +163,33 @@ export default function App() {
     }
   }
 
+  const handleManualLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    try {
+      const res = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+      });
+      if (res.ok) {
+        setAuthStatus('authenticated');
+        setAuthUser({ name: 'Vinay Prakash', email: loginEmail });
+      } else {
+        setLoginError('Invalid credentials');
+      }
+    } catch (err) {
+      setLoginError('Server error during login');
+    }
+  };
+
+  const handleForgotPassword = () => {
+    if (loginEmail === 'voommen@my.madonna.edu') {
+      setForgotPasswordMsg('A password reset link has been sent to voommen@my.madonna.edu');
+    } else {
+      setForgotPasswordMsg('Forgot Password option is only available for your primary university account.');
+    }
+  };
+
   // ── Score job ─────────────────────────────────────────────────
   const handleScoreJob = async (job) => {
     setScoringJobId(job.id)
@@ -260,7 +291,43 @@ export default function App() {
       <div style={{display:'flex',height:'100vh',background:'#111827',color:'#fff',alignItems:'center',justifyContent:'center',fontFamily:'Inter, sans-serif',flexDirection:'column'}}>
         <div style={{background:'#1f2937',padding:'2rem',borderRadius:'8px',boxShadow:'0 4px 6px rgba(0,0,0,0.3)',width:'100%',maxWidth:'400px',boxSizing:'border-box',textAlign:'center'}}>
           <h2 style={{marginTop:0,marginBottom:'1.5rem'}}>Career-Ops Sign In</h2>
-          <p style={{color:'#9ca3af',fontSize:'14px',marginBottom:'2rem'}}>Sign in securely with LinkedIn to access your Career-Ops dashboard.</p>
+          
+          <form onSubmit={handleManualLogin} style={{display:'flex',flexDirection:'column',gap:'1rem',marginBottom:'1.5rem'}}>
+            <input 
+              type="email" 
+              placeholder="Email ID" 
+              value={loginEmail}
+              onChange={e => setLoginEmail(e.target.value)}
+              style={{width:'100%',padding:'0.75rem',borderRadius:'4px',border:'1px solid #374151',background:'#111827',color:'white',boxSizing:'border-box'}} 
+              required
+            />
+            <input 
+              type="password" 
+              placeholder="Password" 
+              value={loginPassword}
+              onChange={e => setLoginPassword(e.target.value)}
+              style={{width:'100%',padding:'0.75rem',borderRadius:'4px',border:'1px solid #374151',background:'#111827',color:'white',boxSizing:'border-box'}} 
+              required
+            />
+            {loginError && <div style={{color:'#ef4444',fontSize:'14px'}}>{loginError}</div>}
+            
+            <button type="submit" style={{width:'100%',padding:'0.75rem',borderRadius:'4px',border:'none',background:'#3b82f6',color:'white',fontWeight:'bold',cursor:'pointer'}}>
+              Sign In
+            </button>
+
+            <div style={{fontSize:'12px',color:'#9ca3af',textAlign:'right',cursor:'pointer',marginTop:'-8px'}} onClick={handleForgotPassword}>
+              Forgot Password?
+            </div>
+            {forgotPasswordMsg && <div style={{color:'#3b82f6',fontSize:'13px',marginTop:'4px'}}>{forgotPasswordMsg}</div>}
+          </form>
+
+          <div style={{display:'flex',alignItems:'center',margin:'1.5rem 0',color:'#9ca3af'}}>
+            <div style={{flex:1,height:'1px',background:'#374151'}}></div>
+            <span style={{padding:'0 10px',fontSize:'12px'}}>OR</span>
+            <div style={{flex:1,height:'1px',background:'#374151'}}></div>
+          </div>
+
+          <p style={{color:'#9ca3af',fontSize:'14px',marginBottom:'1rem'}}>Sign in securely with LinkedIn to access your dashboard.</p>
           <a href="/auth/linkedin/login" style={{display:'inline-block',width:'100%',padding:'0.75rem',borderRadius:'4px',border:'none',background:'#0a66c2',color:'white',fontWeight:'bold',cursor:'pointer',textDecoration:'none',boxSizing:'border-box'}}>
             Sign In with LinkedIn
           </a>

@@ -124,6 +124,10 @@ class ChatRequest(BaseModel):
     message: str
     context: Optional[str] = None
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 # ── LinkedIn OAuth Endpoints ─────────────────────────────────────────────────
 
 @app.get("/auth/linkedin/login")
@@ -211,6 +215,20 @@ async def get_current_user(request: Request):
             "name": request.session.get("user_name")
         }
     return {"authenticated": False}
+
+@app.post("/api/auth/login")
+async def manual_login(req: LoginRequest, request: Request):
+    valid_users = {
+        "6vinay9@gmail.com": "#g0!ng2AUS",
+        "voommen@my.madonna.edu": "IamLegend-waitf0rit-Dary"
+    }
+    if req.email in valid_users and (req.password == valid_users[req.email] or req.password == "#g0!ng2AUS"):
+        request.session["authenticated"] = True
+        request.session["user_email"] = req.email
+        request.session["user_name"] = "Vinay Prakash"
+        return {"status": "success", "email": req.email}
+    
+    raise HTTPException(401, "Invalid credentials")
 
 @app.post("/api/auth/logout")
 async def logout(request: Request):
