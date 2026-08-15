@@ -129,6 +129,13 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class OptimizeRequest(BaseModel):
+    job_id: str
+    role: str
+    company: str
+    location: Optional[str] = "Dubai, UAE"
+    resume_filename: Optional[str] = None  # uploaded resume to use as base
+
 # ── LinkedIn OAuth Endpoints ─────────────────────────────────────────────────
 
 @app.get("/auth/linkedin/login")
@@ -544,6 +551,101 @@ async def delete_resume(filename: str = Query(...)):
 
 # Serve uploaded resumes for direct preview and download
 app.mount("/resumes", StaticFiles(directory=RESUMES_DIR), name="resumes")
+
+# ── Resume Active Selection (persistent across sessions) ────────────────────
+_active_resume_store_path = os.path.join(BASE_DIR, "data", "active_resume.json")
+
+def _get_active_resume() -> Optional[str]:
+    try:
+        with open(_active_resume_store_path, "r") as f:
+            return json.load(f).get("filename")
+    except Exception:
+        return None
+
+def _set_active_resume(filename: Optional[str]):
+    os.makedirs(os.path.dirname(_active_resume_store_path), exist_ok=True)
+    with open(_active_resume_store_path, "w") as f:
+        json.dump({"filename": filename}, f)
+
+@app.get("/api/resumes/active")
+async def get_active_resume():
+    """Return the currently selected/active uploaded resume for tailoring."""
+    filename = _get_active_resume()
+    if filename:
+        fpath = os.path.join(RESUMES_DIR, filename)
+        if os.path.exists(fpath):
+            return {"filename": filename, "exists": True}
+    return {"filename": None, "exists": False}
+
+@app.post("/api/resumes/active")
+async def set_active_resume(data: dict = Body(...)):
+    """Mark a specific uploaded resume as the active base for tailoring."""
+    filename = os.path.basename(data.get("filename", ""))
+    if not filename:
+        _set_active_resume(None)
+        return {"status": "cleared"}
+    fpath = os.path.join(RESUMES_DIR, filename)
+    if not os.path.exists(fpath):
+        raise HTTPException(404, f"Resume file not found: {filename}")
+    _set_active_resume(filename)
+    return {"status": "set", "filename": filename}
+
+# ── Tailor / Optimize Resume from Job Card ───────────────────────────────────
+
+@app.post("/api/optimize")
+async def optimize_resume(req: OptimizeRequest):
+    """
+    Called by the Tailor button on the Jobs page.
+    1. Looks up the job's description and scoring data from pipeline.
+    2. Uses the active uploaded resume (if any) as the base context.
+    3. Calls the LaTeX tailoring engine to customise the cv-template.
+    4. Compiles to PDF and returns asset links.
+    """
+    # Try to get job description + scoring data from pipeline
+    item = pipeline_store.get_by_id(req.job_id) or {}
+    jd = item.get("description", "")
+    score_data = item.get("score") if isinstance(item.get("score"), dict) else {}
+
+    # Optional: read content of active uploaded resume as additional context
+    active_resume_context = ""
+    active_file = req.resume_filename or _get_active_resume()
+    if active_file:
+        fpath = os.path.join(RESUMES_DIR, os.path.basename(active_file))
+        if os.path.exists(fpath):
+            try:
+                # For .tex files, read directly; for PDF/DOCX just note the filename
+                if fpath.endswith(".tex"):
+                    with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                        active_resume_context = f.read()[:4000]  # trim to safe prompt size
+                else:
+                    active_resume_context = f"[Using uploaded resume as base: {active_file}]"
+            except Exception:
+                pass
+
+    # Generate tailored LaTeX resume
+    tex_res = await latex_tailor.generate_tailored_resume(
+        job_title=req.role,
+        company_name=req.company,
+        job_description=jd or f"Role: {req.role} at {req.company}, Location: {req.location}",
+        evaluation_data=score_data
+    )
+
+    # Compile PDF
+    pdf_path = pdf_compiler.compile_resume_to_pdf(
+        req.role, req.company, tex_res.get("tex_code", ""), "Vinay Prakash"
+    )
+    pdf_filename = os.path.basename(pdf_path) if pdf_path else None
+    tex_filename = tex_res.get("tex_filename", "")
+
+    return {
+        "status": "success",
+        "message": f"Resume tailored for {req.role} at {req.company}",
+        "tailored_resume_tex": tex_filename,
+        "tailored_resume_pdf": pdf_filename,
+        "base_resume_used": active_file or "cv-template.tex (default)",
+        "tex_download_url": f"/api/downloads/latex/{tex_filename}" if tex_filename else None,
+        "pdf_download_url": f"/api/downloads/pdf/{pdf_filename}" if pdf_filename else None,
+    }
 
 # ── Reports Direct Serving ───────────────────────────────────────────────────
 

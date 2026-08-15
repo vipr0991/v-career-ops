@@ -218,6 +218,7 @@ export default function ResumeHubPage({ jobs, onOptimizeResume, addToast }) {
   const [dragOver, setDragOver] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deleting, setDeleting]   = useState(null)
+  const [activeResume, setActiveResume] = useState(null)  // filename of active base resume
 
   /* ── Resume Builder state ────────────────────────────────────── */
   const [selectedJobId, setSelectedJobId] = useState('')
@@ -233,7 +234,32 @@ export default function ResumeHubPage({ jobs, onOptimizeResume, addToast }) {
 
   const scoredJobs = (jobs || []).filter(j => j.score != null)
 
-  useEffect(() => { fetchResumes() }, [])
+  useEffect(() => { fetchResumes(); fetchActiveResume() }, [])
+
+  /* ── API: load active resume ─────────────────────────────────── */
+  const fetchActiveResume = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/resumes/active`)
+      if (res.ok) { const d = await res.json(); setActiveResume(d.filename || null) }
+    } catch {}
+  }
+
+  /* ── API: set active resume ──────────────────────────────────── */
+  const handleSetActive = async (filename) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/resumes/active`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename })
+      })
+      if (res.ok) {
+        setActiveResume(filename)
+        addToast(`✓ "${filename}" set as active base for Tailor`, 'success')
+      } else {
+        addToast('Could not set active resume', 'error')
+      }
+    } catch (err) { addToast('Error: ' + err.message, 'error') }
+  }
 
   /* ── API: load uploaded resumes ──────────────────────────────── */
   const fetchResumes = async () => {
@@ -397,16 +423,26 @@ export default function ResumeHubPage({ jobs, onOptimizeResume, addToast }) {
                 const isTex = file.name?.endsWith('.tex')
                 const isDel = deleting === file.name
                 return (
-                  <div key={i} className="resume-card" style={{opacity:isDel?0.5:1}}>
+                  <div key={i} className="resume-card" style={{opacity:isDel?0.5:1,border: activeResume===file.name ? '1.5px solid var(--accent-success)' : undefined}}>
                     <div className={`resume-card-icon ${isTex?'tex':''}`}>
                       <span className="material-symbols-outlined">
                         {isPdf?'picture_as_pdf':isTex?'code':'description'}
                       </span>
                     </div>
                     <div className="resume-card-info">
-                      <div className="resume-card-name">{file.name}</div>
+                      <div className="resume-card-name" style={{display:'flex',alignItems:'center',gap:6}}>
+                        {file.name}
+                        {activeResume===file.name && (
+                          <span style={{fontSize:10,background:'rgba(16,185,129,0.15)',color:'var(--accent-success)',padding:'1px 6px',borderRadius:10,fontWeight:600}}>ACTIVE BASE</span>
+                        )}
+                      </div>
                       <div className="resume-card-detail">{file.size} · {file.date}</div>
                       <div className="resume-card-actions">
+                        {activeResume !== file.name && (
+                          <button onClick={()=>handleSetActive(file.name)} className="btn btn-secondary btn-sm" style={{padding:'4px 10px',fontSize:11,color:'var(--accent-success)',borderColor:'var(--accent-success)'}}>
+                            <span className="material-symbols-outlined" style={{fontSize:13}}>check_circle</span> Use for Tailor
+                          </button>
+                        )}
                         <a href={`${API_BASE}/resumes/${file.name}`} download className="btn btn-secondary btn-sm" style={{padding:'4px 10px',fontSize:11}}>
                           <span className="material-symbols-outlined" style={{fontSize:14}}>download</span> Download
                         </a>
