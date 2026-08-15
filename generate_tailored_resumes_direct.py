@@ -46,14 +46,20 @@ def esc(s):
              .replace("^", r"\textasciicircum{}"))
 
 def build_resume(
-    name, email, phone, linkedin, location,
-    summary, competencies,
-    experience_list,  # list of dicts: title, company, location, period, bullets
-    education_list,   # list of dicts: degree, institution, year, note
-    certifications,   # list of strings
-    skills_dict       # dict of category: csv_skills
+    name, email, phone, phone_india="", linkedin="", behance="", location="",
+    summary="", competencies=None,
+    experience_list=None,  # list of dicts: title, company, location, period, bullets
+    education_list=None,   # list of dicts: degree, institution, year
+    certifications=None,   # list of strings
+    skills_dict=None       # dict of category: csv_skills
 ):
     """Build a complete LaTeX resume document."""
+    competencies = competencies or []
+    experience_list = experience_list or []
+    education_list = education_list or []
+    certifications = certifications or []
+    skills_dict = skills_dict or {}
+
     exp_sec = ""
     for exp in experience_list:
         bullets = "\n".join(f"        \\resumeItem{{{esc(b)}}}" for b in exp["bullets"] if b.strip())
@@ -70,18 +76,28 @@ def build_resume(
         edu_sec += f"""
     \\resumeSubheading
       {{{esc(edu['degree'])}}}{{{esc(edu.get('year',''))}}}
-      {{{esc(edu['institution'])}}}{{{esc(edu.get('note',''))}}}"""
+      {{{esc(edu['institution'])}}}{{}}"""
 
     comp_str = " $\\bullet$ ".join(esc(c) for c in competencies)
-    cert_str = " \\\\\n".join(f"     \\textbf{{}} {esc(c)}" for c in certifications)
+    cert_str = " \\\\\n".join(f"     \\textbf{{}} {esc(c)}" for c in certifications) if certifications else ""
     skill_str = " \\\\\n".join(f"     \\textbf{{{esc(k)}}}{{: {esc(v)}}}" for k, v in skills_dict.items())
+
+    # Build contact line with both phone numbers
+    phone_line = esc(phone)
+    if phone_india:
+        phone_line += f" $|$ {esc(phone_india)}"
+
+    # Build links line
+    links_line = f"\\href{{https://{linkedin}}}{{{esc(linkedin)}}}"
+    if behance:
+        links_line += f" $|$ \\href{{https://{behance}}}{{{esc(behance)}}}"
 
     return f"""{PREAMBLE}
 \\begin{{document}}
 \\begin{{tabular*}}{{\\textwidth}}{{l@{{\\extracolsep{{\\fill}}}}r}}
   \\textbf{{\\Large {esc(name)}}} & Email: \\href{{mailto:{email}}}{{{esc(email)}}}\\\\
-  {esc(location)} & Mobile: {esc(phone)} \\\\
-  \\href{{https://{linkedin}}}{{{esc(linkedin)}}} & \\\\
+  {esc(location)} & Mobile: {phone_line} \\\\
+  {links_line} & \\\\
 \\end{{tabular*}}
 
 %-----------SUMMARY-----------
@@ -127,22 +143,22 @@ CANDIDATE = dict(
     name="Vinay Prakash",
     email="voommen@my.madonna.edu",
     phone="+971 58 595 1173",
+    phone_india="+91 9645591928",
     linkedin="linkedin.com/in/vipr0",
-    location="Dubai, UAE",
+    behance="behance.net/vinaypoommen",
+    location="Dubai, United Arab Emirates",
 )
 
 EDUCATION = [
-    dict(degree="Bachelor of Business Administration (BBA)",
-         institution="Madonna University, USA", year="Completed", note="Business & Marketing"),
+    dict(degree="MBA in International Business, Minor in Marketing",
+         institution="Madonna University, Livonia", year="2016"),
+    dict(degree="B.Sc. in International Business, Minor in Economics",
+         institution="Madonna University, Livonia", year="2012"),
 ]
 
-CERTS = [
-    "Google Analytics Individual Qualification (GAIQ) — Google",
-    "Meta Blueprint Certified: Media Buying \\& Planning — Meta",
-    "HubSpot Marketing Software Certification — HubSpot Academy",
-    "AI Prompt Engineering \\& LLM Workflows — Coursera / Google",
-    "SEO Fundamentals Certification — SEMrush Academy",
-]
+# No fabricated certifications — only include what exists in master resume
+CERTS = []
+
 
 BASE_SKILLS = {
     "AI \\& Automation": "Gemini 2.5, Claude Sonnet, GPT-4o, Antigravity 2.0, n8n, Zapier, Make, Prompt Engineering",

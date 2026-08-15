@@ -24,9 +24,9 @@ from pdf_compiler import pdf_compiler
 # ── Vinay's authentic profile (sourced from profile.yml + resume) ─────────────
 VINAY_AUTHENTIC_RESUME = """
 CANDIDATE: Vinay Prakash
-EMAIL: voommen@my.madonna.edu | PHONE: +971585951173
+EMAIL: voommen@my.madonna.edu | PHONE (UAE): +971 58 595 1173 | PHONE (IN): +91 9645591928
 LINKEDIN: linkedin.com/in/vipr0 | PORTFOLIO: behance.net/vinaypoommen
-LOCATION: Dubai, UAE | NATIONALITY: Indian (No sponsorship needed for UAE)
+LOCATION: Dubai, United Arab Emirates
 
 PROFESSIONAL SUMMARY:
 Strategic Marketing & Editorial Leader with 13+ years of experience (8+ in marketing), 

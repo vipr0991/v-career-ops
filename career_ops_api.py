@@ -613,7 +613,7 @@ async def optimize_resume(req: OptimizeRequest):
             try:
                 if fpath.endswith(".tex"):
                     with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                        uploaded_resume_content = f.read()[:6000]
+                        uploaded_resume_content = f.read()
                 elif fpath.endswith((".pdf", ".docx", ".doc")):
                     uploaded_resume_content = (
                         f"[Uploaded resume '{active_file}' is a {fpath.split('.')[-1].upper()} file. "
@@ -728,7 +728,7 @@ async def generate_application_kit(req: GenerateKitRequest):
         if os.path.exists(fpath) and fpath.endswith(".tex"):
             try:
                 with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                    active_resume_content = f.read()[:6000]
+                    active_resume_content = f.read()
             except Exception:
                 pass
 

@@ -2,6 +2,7 @@
 Career-Ops PDF Resume Compiler
 Converts tailored LaTeX and master resume data into polished, ATS-compliant PDF documents using ReportLab.
 Source of Truth: Vinay_Prakash_Resume_Optimized_6.8
+Layout: Compact but readable ~1.5 pages with professional spacing
 """
 import os
 import re
@@ -9,7 +10,7 @@ import time
 from typing import Dict, Any, Optional, List
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Table, TableStyle, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 
@@ -166,6 +167,16 @@ class PDFCompiler:
 
         return extracted
 
+    def _add_page_number(self, canvas, doc):
+        """Add page number footer to multi-page PDFs."""
+        page_num = canvas.getPageNumber()
+        if page_num > 1:
+            canvas.saveState()
+            canvas.setFont('Helvetica', 8)
+            canvas.setFillColor(colors.HexColor('#6B7280'))
+            canvas.drawCentredString(A4[0] / 2, 20, str(page_num))
+            canvas.restoreState()
+
     def compile_resume_to_pdf(
         self,
         job_title: str,
@@ -177,6 +188,7 @@ class PDFCompiler:
         """
         Compiles authentic tailored resume content into an ATS-friendly, professional PDF file.
         Strictly reflects Vinay_Prakash_Resume_Optimized_6.8.
+        Layout: Compact but readable ~1.5 pages — NOT squeezed into a single page.
         """
         if custom_filename:
             pdf_filename = custom_filename
@@ -187,10 +199,10 @@ class PDFCompiler:
         doc = SimpleDocTemplate(
             pdf_path,
             pagesize=A4,
-            rightMargin=30,
-            leftMargin=30,
-            topMargin=30,
-            bottomMargin=30
+            rightMargin=42,
+            leftMargin=42,
+            topMargin=36,
+            bottomMargin=36
         )
 
         styles = getSampleStyleSheet()
@@ -222,8 +234,8 @@ class PDFCompiler:
             fontSize=10,
             leading=13,
             textColor=colors.HexColor('#111827'),
-            spaceBefore=6,
-            spaceAfter=2
+            spaceBefore=8,
+            spaceAfter=3
         )
 
         job_title_style = ParagraphStyle(
@@ -268,8 +280,8 @@ class PDFCompiler:
             'BodyText',
             parent=styles['Normal'],
             fontName='Helvetica',
-            fontSize=8.5,
-            leading=11.5,
+            fontSize=9,
+            leading=12,
             textColor=colors.HexColor('#1F2937'),
             alignment=TA_JUSTIFY
         )
@@ -278,14 +290,19 @@ class PDFCompiler:
             'BulletText',
             parent=styles['Normal'],
             fontName='Helvetica',
-            fontSize=8.5,
-            leading=11.5,
+            fontSize=9,
+            leading=12,
             textColor=colors.HexColor('#1F2937'),
-            leftIndent=10,
-            firstLineIndent=-6
+            leftIndent=12,
+            firstLineIndent=-8
         )
 
         story = []
+
+        # Available width for table columns
+        available_width = A4[0] - 42 - 42  # page width minus margins
+        col_left = available_width * 0.72
+        col_right = available_width * 0.28
 
         # 1. Header: Name & Authentic Contact Line
         story.append(Paragraph(candidate_name, title_style))
@@ -307,14 +324,14 @@ class PDFCompiler:
         story.append(Paragraph(skills_text, body_style))
         story.append(Spacer(1, 4))
 
-        # 4. Professional Experience (All 8 Authentic Roles)
+        # 4. Professional Experience (All 8 Authentic Roles — full bullet points)
         story.append(Paragraph("PROFESSIONAL EXPERIENCE", section_heading))
 
         for exp in MASTER_EXPERIENCE:
             # Header Row: Title & Date
             hdr_table = Table([
                 [Paragraph(exp["title"], job_title_style), Paragraph(exp["period"], job_date_style)]
-            ], colWidths=[385, 150])
+            ], colWidths=[col_left, col_right])
             hdr_table.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -327,7 +344,7 @@ class PDFCompiler:
             # Subheader Row: Company & Location
             sub_table = Table([
                 [Paragraph(exp["company"], job_company_style), Paragraph(exp["location"], job_loc_style)]
-            ], colWidths=[385, 150])
+            ], colWidths=[col_left, col_right])
             sub_table.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -337,19 +354,19 @@ class PDFCompiler:
             ]))
             story.append(sub_table)
 
-            # Bullets
+            # ALL Bullets — every single one from master resume
             for b in exp["bullets"]:
                 clean_b = b.replace(r'\%', '%').replace(r'\$', '$').replace(r'\&', '&')
                 story.append(Paragraph(f"• {clean_b}", bullet_style))
 
-            story.append(Spacer(1, 3))
+            story.append(Spacer(1, 4))
 
-        # 5. Education
+        # 5. Education (Both Entries)
         story.append(Paragraph("EDUCATION", section_heading))
         for edu in MASTER_EDUCATION:
             edu_table = Table([
                 [Paragraph(f"<b>{edu['degree']}</b>", job_title_style), Paragraph(f"<b>{edu['year']}</b>", job_date_style)]
-            ], colWidths=[420, 115])
+            ], colWidths=[col_left + 20, col_right - 20])
             edu_table.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -359,10 +376,10 @@ class PDFCompiler:
             ]))
             story.append(edu_table)
             story.append(Paragraph(edu['institution'], job_company_style))
-            story.append(Spacer(1, 2))
+            story.append(Spacer(1, 3))
 
-        # Build document
-        doc.build(story)
+        # Build document — allowSplitting enables multi-page flow
+        doc.build(story, onFirstPage=self._add_page_number, onLaterPages=self._add_page_number)
         return pdf_path
 
 pdf_compiler = PDFCompiler()

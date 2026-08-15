@@ -2,6 +2,7 @@
 LaTeX Resume Tailoring Engine
 Powered by Moonshot Kimi API & Google Gemini API
 Strictly preserves 100% of authentic career facts from Vinay_Prakash_Resume_Optimized_6.8
+Generates compact but readable ~1.5 page resumes (NOT squeezed one-pagers).
 """
 import os
 import re
@@ -28,7 +29,7 @@ class LatexTailoringEngine:
         )
         self.gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
         self.template_path = os.path.join(TEMPLATES_DIR, "cv-template.tex")
-        self.timeout = 60.0
+        self.timeout = 90.0
 
     def _load_template(self) -> str:
         if os.path.exists(self.template_path):
@@ -47,6 +48,7 @@ class LatexTailoringEngine:
         """
         Generates a tailored LaTeX resume using Moonshot Kimi AI (with Gemini AI fallback).
         Strictly preserves every authentic detail from Vinay_Prakash_Resume_Optimized_6.8.
+        Outputs a compact but readable ~1.5 page resume with all 8 roles and full bullet points.
         """
         template_raw = self._load_template()
         tex_filename = resume_namer.generate_filename(company_name or "Target", extension="tex", candidate_name="Vinay")
@@ -71,40 +73,54 @@ Your task is to adapt the candidate's authentic LaTeX resume for a specific targ
 CRITICAL INVARIANTS — ABSOLUTE PRESERVATION RULES:
 1. Master Source of Truth: Vinay_Prakash_Resume_Optimized_6.8.
 2. DO NOT invent, exaggerate, hallucinate, or add any experience, skills, achievements, education, certifications, companies, dates, or details not present in the source resume.
-3. PRESERVE ALL 8 AUTHENTIC ROLES with their exact companies, titles, and dates:
-   - Business Tabloid (Jan 2025 -- Present)
-   - Green Earth Action Foundation (May 2024 -- Jan 2025)
-   - Business Tabloid (Aug 2022 -- May 2024)
-   - Medialogic (Apr 2020 -- Aug 2022)
-   - Ecommerce Bay L.L.C (Jan 2018 -- Mar 2020)
-   - Green Energy Solutions Ventilation (Dec 2016 -- Dec 2017)
-   - Zomato (Jun 2015 -- Sep 2015)
-   - Sanyo, LG, HP, Etisalat, Panasonic (Jun 2008 -- Aug 2012)
-4. PRESERVE ALL AUTHENTIC METRICS: 4415% growth, 3M+ reach, $130K+ budget, 90,000+ reach, 1000% newsletter, 5,166+ article views, 1,100+ webinar attendance, 645% social growth, 428% organic growth, AED 250,000+ ROI.
-5. PRESERVE EXACT EDUCATION:
+3. PRESERVE ALL 8 AUTHENTIC ROLES with their exact companies, titles, dates, AND ALL BULLET POINTS:
+   - Business Tabloid (Jan 2025 -- Present) — 4 bullet points
+   - Green Earth Action Foundation (May 2024 -- Jan 2025) — 3 bullet points
+   - Business Tabloid (Aug 2022 -- May 2024) — 3 bullet points
+   - Medialogic (Apr 2020 -- Aug 2022) — 3 bullet points
+   - Ecommerce Bay L.L.C (Jan 2018 -- Mar 2020) — 2 bullet points
+   - Green Energy Solutions Ventilation (Dec 2016 -- Dec 2017) — 1 bullet point
+   - Zomato (Jun 2015 -- Sep 2015) — 1 bullet point
+   - Sanyo, LG, HP, Etisalat, Panasonic (Jun 2008 -- Aug 2012) — 1 bullet point
+4. PRESERVE ALL AUTHENTIC METRICS: 4415% growth, 3M+ reach, $130K+ budget, 90,000+ reach, 1000% newsletter, 5,166+ article views, 1,100+ webinar attendance, 645% social growth, 428% organic growth, AED 250,000+ ROI, AED 590K+ ROI, AED 60,000+ sales.
+5. PRESERVE EXACT EDUCATION (both entries):
    - MBA in International Business, Minor in Marketing (2016) -- Madonna University, Livonia
    - B.Sc. in International Business, Minor in Economics (2012) -- Madonna University, Livonia
+6. PRESERVE EXACT CONTACT DETAILS — do NOT skip or alter any:
+   - Email: voommen@my.madonna.edu
+   - UAE Phone: +971 58 595 1173
+   - India Phone: +91 9645591928
+   - LinkedIn: linkedin.com/in/vipr0
+   - Behance: behance.net/vinaypoommen
+
+CRITICAL LAYOUT RULES:
+6. The resume MUST be a compact but readable ~1.5 page document. DO NOT compress everything onto a single page.
+7. Use \\usepackage[top=0.6in,bottom=0.6in,left=0.65in,right=0.65in]{geometry} for comfortable margins.
+8. Use \\usepackage{fancyhdr} with \\pagestyle{fancy} and \\fancyfoot[C]{\\footnotesize\\thepage} for page numbers.
+9. Use 10pt font size (\\documentclass[10pt,a4paper]{article}).
+10. Every job entry MUST include ALL original bullet points — do NOT remove, merge, or summarise any bullets.
 
 PERMITTED MINOR TAILORING:
 - Tailor the 1-paragraph Summary to align with the target role and incorporate relevant keywords naturally from the job description.
-- Emphasize the matching Core Skills from the candidate's authentic skill set.
-- Minor keyword tuning in bullet points of recent roles without altering any factual claims or metrics.
+- Emphasize the matching Core Skills from the candidate's authentic skill set (may add 1-2 relevant keywords from JD if they are genuinely supported by the candidate's experience).
+- Minor keyword tuning in bullet points of the 2-3 most recent roles WITHOUT altering any factual claims, metrics, or company names.
 
 OUTPUT FORMAT:
 Return ONLY valid, compilable LaTeX code beginning with \\documentclass and ending with \\end{document}.
-Do NOT enclose the output in markdown fences (```latex)."""
+Do NOT enclose the output in markdown fences (```latex).
+The output MUST be the COMPLETE resume — every section, every role, every bullet, and both education entries."""
 
         user_prompt = f"""Target Role: {job_title}
 Target Company: {company_name}
 Target Job Keywords: {keywords_str}
 
 Job Context:
-{job_description[:1200]}
+{job_description[:1500]}
 
-Candidate's Master LaTeX Resume (Source of Truth):
+Candidate's Master LaTeX Resume (Source of Truth — reproduce ALL content):
 {primary_source}
 
-Generate the tailored LaTeX resume now:"""
+Generate the FULL tailored LaTeX resume now (all 8 roles, all bullet points, both education entries, ~1.5 pages):"""
 
         # 1. Try Moonshot Kimi API
         if self.kimi_key:
@@ -125,7 +141,7 @@ Generate the tailored LaTeX resume now:"""
                                     {"role": "user", "content": user_prompt}
                                 ],
                                 "temperature": 0.2,
-                                "max_tokens": 4096
+                                "max_tokens": 8192
                             }
                         )
 
@@ -136,14 +152,18 @@ Generate the tailored LaTeX resume now:"""
                             cleaned_tex = re.sub(r"^```\s*$", "", cleaned_tex, flags=re.MULTILINE).strip()
 
                             if "\\documentclass" in cleaned_tex and "\\end{document}" in cleaned_tex:
-                                with open(tex_path, "w", encoding="utf-8") as f:
-                                    f.write(cleaned_tex)
-                                return {
-                                    "tex_path": tex_path,
-                                    "tex_filename": tex_filename,
-                                    "tex_code": cleaned_tex,
-                                    "engine": f"Moonshot Kimi ({kmodel})"
-                                }
+                                # Validate that critical content is preserved
+                                if self._validate_content_integrity(cleaned_tex):
+                                    with open(tex_path, "w", encoding="utf-8") as f:
+                                        f.write(cleaned_tex)
+                                    return {
+                                        "tex_path": tex_path,
+                                        "tex_filename": tex_filename,
+                                        "tex_code": cleaned_tex,
+                                        "engine": f"Moonshot Kimi ({kmodel})"
+                                    }
+                                else:
+                                    print(f"[LaTeX] Kimi ({kmodel}) output failed content integrity check, trying next model")
                         else:
                             print(f"[LaTeX] Moonshot Kimi ({kmodel}) status {response.status_code}: {response.text[:200]}")
                 except Exception as e:
@@ -162,7 +182,7 @@ Generate the tailored LaTeX resume now:"""
                             params={"key": self.gemini_key},
                             json={
                                 "contents": [{"parts": [{"text": full_gemini_prompt}]}],
-                                "generationConfig": {"temperature": 0.15, "maxOutputTokens": 8192}
+                                "generationConfig": {"temperature": 0.15, "maxOutputTokens": 16384}
                             }
                         )
 
@@ -178,18 +198,21 @@ Generate the tailored LaTeX resume now:"""
                             cleaned_tex = re.sub(r"^```\s*$", "", cleaned_tex, flags=re.MULTILINE).strip()
 
                             if "\\documentclass" in cleaned_tex and "\\end{document}" in cleaned_tex:
-                                with open(tex_path, "w", encoding="utf-8") as f:
-                                    f.write(cleaned_tex)
-                                return {
-                                    "tex_path": tex_path,
-                                    "tex_filename": tex_filename,
-                                    "tex_code": cleaned_tex,
-                                    "engine": f"Gemini ({gmodel})"
-                                }
+                                if self._validate_content_integrity(cleaned_tex):
+                                    with open(tex_path, "w", encoding="utf-8") as f:
+                                        f.write(cleaned_tex)
+                                    return {
+                                        "tex_path": tex_path,
+                                        "tex_filename": tex_filename,
+                                        "tex_code": cleaned_tex,
+                                        "engine": f"Gemini ({gmodel})"
+                                    }
+                                else:
+                                    print(f"[LaTeX] Gemini ({gmodel}) output failed content integrity check, trying next model")
                 except Exception as e:
                     print(f"[LaTeX] Gemini {gmodel} error: {e}")
 
-        # Fallback: write master template directly
+        # Fallback: write master template directly (guaranteed full content)
         with open(tex_path, "w", encoding="utf-8") as f:
             f.write(primary_source)
 
@@ -199,5 +222,48 @@ Generate the tailored LaTeX resume now:"""
             "tex_code": primary_source,
             "engine": "Master Template Direct"
         }
+
+    def _validate_content_integrity(self, tex_code: str) -> bool:
+        """
+        Validates that the AI-generated LaTeX preserves all critical content from the master resume.
+        Returns True only if all 8 roles, education, and key metrics are present.
+        """
+        required_companies = [
+            "Business Tabloid",
+            "Green Earth",
+            "Medialogic",
+            "Ecommerce Bay",
+            "Green Energy",
+            "Zomato",
+            "Sanyo"
+        ]
+        required_education = [
+            "Madonna University",
+            "MBA",
+            "B.Sc"
+        ]
+        required_metrics = [
+            "4415",
+            "130K",
+            "90,000",
+            "1000",
+        ]
+
+        for company in required_companies:
+            if company not in tex_code:
+                print(f"[LaTeX Integrity] MISSING company: {company}")
+                return False
+
+        for edu in required_education:
+            if edu not in tex_code:
+                print(f"[LaTeX Integrity] MISSING education: {edu}")
+                return False
+
+        metrics_found = sum(1 for m in required_metrics if m in tex_code)
+        if metrics_found < 3:
+            print(f"[LaTeX Integrity] Only {metrics_found}/4 key metrics found")
+            return False
+
+        return True
 
 latex_tailor = LatexTailoringEngine()

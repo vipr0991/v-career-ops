@@ -17,21 +17,22 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 LATEX_DIR = os.path.join(ROOT, "latex_resumes")
 os.makedirs(LATEX_DIR, exist_ok=True)
 
-PREAMBLE = r"""\documentclass[10.5pt,a4paper]{article}
+PREAMBLE = r"""\documentclass[10pt,a4paper]{article}
 
-\usepackage[margin=0.55in]{geometry}
+\usepackage[top=0.6in,bottom=0.6in,left=0.65in,right=0.65in]{geometry}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{tabularx}
+\usepackage{fancyhdr}
 
 \definecolor{primary}{RGB}{20, 20, 20}
 \definecolor{accent}{RGB}{40, 40, 40}
 
 % Section formatting
-\titleformat{\section}{\large\bfseries\scshape\color{primary}}{}{0em}{}[\titlerule]
-\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titleformat{\section}{\normalsize\bfseries\scshape\color{primary}}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{7pt}{3pt}
 
 \hypersetup{
   colorlinks=true,
@@ -39,10 +40,15 @@ PREAMBLE = r"""\documentclass[10.5pt,a4paper]{article}
   linkcolor=blue!70!black
 }
 
-\pagestyle{empty}
+% Allow multi-page with subtle page numbers
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{\footnotesize\thepage}
 
 \begin{document}
 """
+
 
 def esc(s):
     if not s:
