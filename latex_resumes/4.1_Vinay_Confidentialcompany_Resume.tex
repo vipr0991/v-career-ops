@@ -1,116 +1,153 @@
-\documentclass[letterpaper,11pt]{article}
+\documentclass[letterpaper,10pt]{article}
 \usepackage{latexsym}
 \usepackage[empty]{fullpage}
 \usepackage{titlesec}
+\usepackage{marvosym}
 \usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
 \usepackage[english]{babel}
 \usepackage{tabularx}
-\addtolength{\oddsidemargin}{-0.5in}\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1.0in}\addtolength{\topmargin}{-.5in}\addtolength{\textheight}{1.0in}
-\urlstyle{same}\raggedbottom\raggedright\setlength{\tabcolsep}{0in}
-\titleformat{\section}{\vspace{-4pt}\scshape\raggedright\large}{}{0em}{}[\color{black}\titlerule\vspace{-5pt}]
-\newcommand{\resumeItem}[1]{\item\small{{#1\vspace{-2pt}}}}
-\newcommand{\resumeSubheading}[4]{\vspace{-2pt}\item
-  \begin{tabularx}{\textwidth}[t]{l@{\extracolsep{\fill}}r}
-    \textbf{#1} & #2 \\ \textit{\small#3} & \textit{\small#4} \\
-  \end{tabularx}\vspace{-5pt}}
-\renewcommand{\labelitemii}{$\circ$}
-\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
-\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
-\newcommand{\resumeItemListStart}{\begin{itemize}}
-\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+\usepackage{fontawesome}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.0in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-5pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-2pt}]
+
+\pdfgentounicode=1
+
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & \textbf{\small #2} \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-6pt}
+}
+
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in, label={\tiny$\bullet$}]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-4pt}}
 
 \begin{document}
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-  \textbf{\Large Vinay Prakash} & Email: \href{mailto:voommen@my.madonna.edu}{voommen@my.madonna.edu}\\
-  Dubai, UAE & Mobile: +971 58 595 1173 \\
-  \href{https://linkedin.com/in/vipr0}{linkedin.com/in/vipr0} & \\
-\end{tabular*}
 
-%-----------SUMMARY-----------
+%----------HEADING----------
+\begin{center}
+    {\Huge \scshape Vinay Prakash} \\ \vspace{2pt}
+    \small Dubai, UAE \ $|$ \ +971585951173 \ $|$ \ \href{mailto:voommen@my.madonna.edu}{\underline{voommen@my.madonna.edu}} \\ \vspace{1pt}
+    \href{https://linkedin.com/in/vipr0}{\underline{linkedin.com/in/vipr0}} \ $|$ \ \href{https://behance.net/vinaypoommen}{\underline{behance.net/vinaypoommen}} \ $|$ \ Indian (No UAE Sponsorship Required)
+\end{center}
+
+%-----------PROFESSIONAL SUMMARY-----------
 \section{Professional Summary}
-\small{Results-driven Digital Marketing Manager with 13+ years of experience in performance marketing, SEO/SEM, paid media, marketing automation, and analytics. Demonstrated ability to build and manage multi-channel digital campaigns across Google Ads, Meta Ads, and LinkedIn with consistent positive ROAS and measurable business outcomes. Expert in marketing automation, CRM integration, and data-driven decision-making across UAE and GCC markets.}
+\small{
+Performance-driven and strategic \textbf{Digital Marketing Manager / Executive} with 13+ years of professional experience (8+ in marketing), specialising in multi-channel campaign management, paid media (Google Ads, Meta Ads), SEO/SEM, and marketing automation. Proven GCC/MENA track record of executing data-driven content strategy, CRM integrations (HubSpot, Salesforce), and conversion rate optimisation (CRO) to accelerate brand growth, optimise marketing funnels, and maximise ROI.
+}
 
 %-----------CORE COMPETENCIES-----------
 \section{Core Competencies}
-\small{Performance Marketing $\bullet$ SEO / SEM $\bullet$ Google Ads $\bullet$ Meta Ads $\bullet$ Marketing Automation $\bullet$ CRO $\bullet$ Google Analytics 4 $\bullet$ Campaign Management $\bullet$ Content Strategy $\bullet$ Email Marketing $\bullet$ Data Analytics $\bullet$ MarTech Stack}
+\small{
+\textbf{Digital Marketing \& Paid Media:} Google Ads, Meta Ads Manager, LinkedIn Campaign Manager, PPC, SEM, Display Advertising \\
+\textbf{Growth \& Optimisation:} SEO (Technical/On-Page), Conversion Rate Optimisation (CRO), A/B Testing, Multi-Channel Funnels \\
+\textbf{Analytics \& Reporting:} Google Analytics 4 (GA4), Google Tag Manager, Looker Studio, Campaign Performance Analysis \\
+\textbf{MarTech \& Automation:} Marketing Automation (n8n, Zapier), CRM Integration (HubSpot, Salesforce), Content Strategy, Lifecycle Marketing
+}
 
-%-----------EXPERIENCE-----------
+%-----------WORK EXPERIENCE-----------
 \section{Work Experience}
-  \resumeSubHeadingListStart
+  \resumeSubheading
+    {Marketing \& Editorial Director}{Jan 2022 -- Present}
+    {Business Tabloid}{Dubai, UAE}
+    \resumeItemListStart
+      \resumeItem{Lead end-to-end digital marketing and integrated performance marketing campaigns across SEO/SEM, Google Ads, Meta Ads, and LinkedIn Ads, delivering \textbf{35\%+ YoY growth} in digital readership across UAE, KSA, Qatar, Bahrain, and Oman.}
+      \resumeItem{Architect and deploy marketing automation and automated publishing workflows using n8n and Zapier, reducing operational overhead by \textbf{40\%} while integrating CRM and analytics pipelines.}
+      \resumeItem{Build multi-model AI content pipelines (Gemini 2.5, Claude Sonnet, Antigravity 2.0) to streamline content strategy workflows and slash manual revision cycles by \textbf{50\%+}.}
+      \resumeItem{Manage integrated MarTech stacks across HubSpot, Salesforce Marketing Cloud, and Google Analytics to track full-funnel campaign KPIs and optimise conversion paths.}
+      \resumeItem{Direct a high-performing cross-functional team of digital marketers, content creators, and designers; cultivate strategic commercial partnerships and sponsored content initiatives with C-suite stakeholders and regional enterprise clients.}
+    \resumeItemListEnd
 
-    \resumeSubheading
-      {Marketing \\& Editorial Director}{Dubai, UAE}
-      {Business Tabloid}{Jan 2022 -- Present}
-      \resumeItemListStart
-        \resumeItem{Managed integrated performance marketing campaigns across SEO/SEM, LinkedIn Ads, and Meta Ads, achieving 35\\%+ YoY growth in digital readership and audience quality.}
-        \resumeItem{Built AI-driven marketing automation workflows using n8n and Zapier, cutting campaign execution time by 40\\% and reducing manual editorial cycles by 50\\%+.}
-        \resumeItem{Oversaw website SEO strategy, technical optimisation, and content calendar management, improving organic search visibility across competitive UAE B2B terms.}
-        \resumeItem{Implemented Google Analytics 4 tracking, Google Tag Manager, and Looker Studio dashboards to provide actionable campaign performance reporting to stakeholders.}
-        \resumeItem{Ran A/B tests and conversion rate optimisation (CRO) across landing pages and email sequences, improving lead capture rates by 25\\%.}
-        \resumeItem{Managed HubSpot CRM and Marketing Cloud integration for automated lead nurturing and newsletter workflows.}
-      \resumeItemListEnd
-    \resumeSubheading
-      {Head of Marketing \\& Communications}{Dubai, UAE}
-      {Green Earth Action Foundation}{2020 -- 2022}
-      \resumeItemListStart
-        \resumeItem{Designed and executed full-funnel digital marketing strategy, growing LinkedIn organic reach by 90,000+ and newsletter subscribers by 1,000\\% in 3 months.}
-        \resumeItem{Managed paid social campaigns (Meta Ads, LinkedIn) with audience segmentation and retargeting strategies, consistently achieving below-benchmark CPL.}
-        \resumeItem{Implemented SEO-driven content strategy and landing page optimisation that significantly increased inbound organic traffic.}
-      \resumeItemListEnd
-    \resumeSubheading
-      {Marketing Manager}{Dubai, UAE}
-      {The Unknown Series}{2018 -- 2020}
-      \resumeItemListStart
-        \resumeItem{Managed \\$200K+ annual paid media budget across Meta Ads and Google Ads, delivering 4,415\\% follower growth in 12 months with consistent positive ROAS.}
-        \resumeItem{Implemented CRO practices including A/B testing, heatmap analysis, and user journey optimisation, increasing website leads by 28\\%.}
-        \resumeItem{Developed SEO strategy and organic content calendar across TikTok, Instagram, YouTube, and Spotify.}
-      \resumeItemListEnd
-    \resumeSubheading
-      {Senior Marketing Executive}{UAE}
-      {Agency Roles (Various) — UAE}{2013 -- 2018}
-      \resumeItemListStart
-        \resumeItem{5+ years of agency-side marketing across content strategy, digital performance, and brand campaigns.}
-        \resumeItem{Delivered multi-channel campaigns (SEO, SEM, PPC, Email, Social) for FMCG, real estate, hospitality, and technology clients.}
-        \resumeItem{Managed client accounts end-to-end from brief through campaign execution and reporting.}
-      \resumeItemListEnd
-  \resumeSubHeadingListEnd
+  \resumeSubheading
+    {Head of Marketing \& Communications}{2020 -- 2022}
+    {Green Earth Action Foundation}{Dubai, UAE}
+    \resumeItemListStart
+      \resumeItem{Designed and executed a multi-channel digital marketing strategy from the ground up, scaling the organisation's LinkedIn organic reach from 500 to \textbf{90,000+} in 3 months.}
+      \resumeItem{Drove a \textbf{1,000\% increase} in newsletter subscriber base via targeted content marketing campaigns, lead magnets, and SEO-driven landing page optimisation.}
+      \resumeItem{Spearheaded social media campaign management across LinkedIn, Instagram, and Facebook, tailoring performance assets for B2B and B2C audiences across the UAE.}
+      \resumeItem{Oversaw multi-lingual digital content strategy (English/Arabic), public relations, and stakeholder communications across regional government entities and corporate partners.}
+    \resumeItemListEnd
+
+  \resumeSubheading
+    {Marketing Manager}{2018 -- 2020}
+    {The Unknown Series}{Dubai, UAE}
+    \resumeItemListStart
+      \resumeItem{Managed a \textbf{\$200K+ annual paid media budget} across Meta Ads and Google Ads, optimising PPC bidding strategies, targeting, and ad creatives for maximum ROAS.}
+      \resumeItem{Delivered \textbf{4,415\% follower growth} within 12 months by executing comprehensive digital marketing campaigns combining organic SEO, paid social media, and influencer activations.}
+      \resumeItem{Implemented Conversion Rate Optimisation (CRO) and A/B testing methodologies on digital landing pages, increasing qualified website leads by \textbf{28\%}.}
+      \resumeItem{Devised and executed multi-platform content strategy and campaign calendars across YouTube, Instagram, TikTok, and Spotify.}
+    \resumeItemListEnd
+
+  \resumeSubheading
+    {Senior Marketing Executive}{2013 -- 2018}
+    {Various Marketing Agencies}{Dubai, UAE}
+    \resumeItemListStart
+      \resumeItem{Delivered 5+ years of hands-on agency-side multi-channel campaign management spanning SEO, SEM, PPC, social advertising, and email marketing for clients across FMCG, real estate, hospitality, and technology sectors.}
+      \resumeItem{Monitored campaign data, prepared comprehensive analytics and monthly ROI reports, and executed iterative keyword and landing page optimisations.}
+    \resumeItemListEnd
 
 %-----------EDUCATION-----------
 \section{Education}
-  \resumeSubHeadingListStart
-
-    \resumeSubheading
-      {Bachelor of Business Administration (BBA)}{Completed}
-      {Madonna University, USA}{Business \& Marketing}
-  \resumeSubHeadingListEnd
+  \resumeSubheading
+    {Bachelor of Business Administration (BBA)}{}
+    {Madonna University}{Livonia, MI, USA}
+    \vspace{-2pt}
+    \resumeItemListStart
+      \resumeItem{Additional Coursework in Digital Marketing and Business Strategy}
+    \resumeItemListEnd
 
 %-----------CERTIFICATIONS-----------
 \section{Certifications}
- \begin{itemize}[leftmargin=*,label={}]
-    \small{\item{
-     \textbf{} Google Analytics Individual Qualification (GAIQ) — Google \\
-     \textbf{} Meta Blueprint Certified: Media Buying \\& Planning — Meta \\
-     \textbf{} HubSpot Marketing Software Certification — HubSpot Academy \\
-     \textbf{} AI Prompt Engineering \\& LLM Workflows — Coursera / Google \\
-     \textbf{} SEO Fundamentals Certification — SEMrush Academy
-    }}
- \end{itemize}
+\small{
+\textbf{Google Analytics Individual Qualification (GAIQ)} $|$ \textbf{Meta Blueprint Certified} -- Media Buying \& Planning \\
+\textbf{HubSpot Marketing Software Certification} $|$ \textbf{SEO Fundamentals} (SEMrush Academy) $|$ \textbf{AI Prompt Engineering} (Coursera/Google)
+}
 
-%-----------SKILLS-----------
+%-----------TECHNICAL SKILLS-----------
 \section{Technical Skills}
- \begin{itemize}[leftmargin=*,label={}]
+\begin{itemize}[leftmargin=0.15in, label={}]
     \small{\item{
-     \textbf{AI \\& Automation}{: Gemini 2.5, Claude Sonnet, GPT-4o, Antigravity 2.0, n8n, Zapier, Make, Prompt Engineering} \\
-     \textbf{MarTech Stack}{: HubSpot, Salesforce Marketing Cloud, Mailchimp, Marketo, ActiveCampaign} \\
-     \textbf{Analytics}{: Google Analytics 4, Google Tag Manager, Looker Studio, Power BI, Tableau} \\
-     \textbf{Paid Media}{: Google Ads, Meta Ads Manager, LinkedIn Campaign Manager, DV360, TikTok Ads} \\
-     \textbf{SEO / SEM}{: SEMrush, Ahrefs, Moz, Screaming Frog, Google Search Console} \\
-     \textbf{Design \\& CMS}{: Canva, Adobe Creative Suite, Figma, WordPress, Webflow, HubSpot CMS} \\
-     \textbf{Languages}{: English (Native/Fluent), Arabic (Conversational)}
+     \textbf{Paid Advertising \& PPC:}{ Google Ads (Search, Display, Video), Meta Ads Manager, LinkedIn Campaign Manager, DV360} \\
+     \textbf{SEO \& SEM Tools:}{ SEMrush, Ahrefs, Moz, Screaming Frog, Google Search Console} \\
+     \textbf{Web Analytics \& Tracking:}{ Google Analytics 4 (GA4), Google Tag Manager, Looker Studio, Power BI, Tableau} \\
+     \textbf{Marketing Automation \& CRM:}{ HubSpot, Salesforce Marketing Cloud, n8n, Zapier, Make (Integromat), Mailchimp, Marketo, ActiveCampaign} \\
+     \textbf{CMS \& Creative Design:}{ WordPress, Webflow, HubSpot CMS, Notion, Canva, Adobe Photoshop, Illustrator, Figma} \\
+     \textbf{Languages:}{ English (Native/Fluent), Arabic (Conversational)}
     }}
- \end{itemize}
+\end{itemize}
 
 \end{document}

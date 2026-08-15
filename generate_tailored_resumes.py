@@ -11,6 +11,8 @@ import json
 # Ensure we run from the career-ops root
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 os.environ.setdefault("PYTHONPATH", ROOT)
 from dotenv import load_dotenv

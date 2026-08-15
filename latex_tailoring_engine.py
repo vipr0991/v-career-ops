@@ -131,43 +131,45 @@ Return ONLY valid, compilable LaTeX code.
 Do NOT wrap it in markdown code fences.
 The output MUST begin with \\documentclass and end with \\end{{document}}."""
 
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-                    headers={"Content-Type": "application/json"},
-                    params={"key": self.gemini_key},
-                    json={
-                        "contents": [{"parts": [{"text": prompt}]}],
-                        "generationConfig": {"temperature": 0.15, "maxOutputTokens": 8192}
-                    }
-                )
-
-                if response.status_code == 200:
-                    data = response.json()
-                    content = (
-                        data.get("candidates", [{}])[0]
-                        .get("content", {})
-                        .get("parts", [{}])[0]
-                        .get("text", "")
-                    )
-                    # Strip any accidental markdown code fences
-                    cleaned_tex = re.sub(r"^```latex\s*", "", content.strip(), flags=re.MULTILINE)
-                    cleaned_tex = re.sub(r"^```\s*$", "", cleaned_tex, flags=re.MULTILINE)
-                    cleaned_tex = cleaned_tex.strip()
-
-                    if "\\documentclass" in cleaned_tex and "\\end{document}" in cleaned_tex:
-                        with open(tex_path, "w", encoding="utf-8") as f:
-                            f.write(cleaned_tex)
-                        return {
-                            "tex_path": tex_path,
-                            "tex_filename": tex_filename,
-                            "tex_code": cleaned_tex,
+        candidate_models = ["gemini-3.7-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-pro-latest"]
+        for model in candidate_models:
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
+                    response = await client.post(
+                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                        headers={"Content-Type": "application/json"},
+                        params={"key": self.gemini_key},
+                        json={
+                            "contents": [{"parts": [{"text": prompt}]}],
+                            "generationConfig": {"temperature": 0.15, "maxOutputTokens": 8192}
                         }
-                else:
-                    print(f"[LaTeX] Gemini API error {response.status_code}: {response.text[:300]}")
-        except Exception as e:
-            print(f"[LaTeX] Tailoring error: {e}")
+                    )
+
+                    if response.status_code == 200:
+                        data = response.json()
+                        content = (
+                            data.get("candidates", [{}])[0]
+                            .get("content", {})
+                            .get("parts", [{}])[0]
+                            .get("text", "")
+                        )
+                        # Strip any accidental markdown code fences
+                        cleaned_tex = re.sub(r"^```latex\s*", "", content.strip(), flags=re.MULTILINE)
+                        cleaned_tex = re.sub(r"^```\s*$", "", cleaned_tex, flags=re.MULTILINE)
+                        cleaned_tex = cleaned_tex.strip()
+
+                        if "\\documentclass" in cleaned_tex and "\\end{document}" in cleaned_tex:
+                            with open(tex_path, "w", encoding="utf-8") as f:
+                                f.write(cleaned_tex)
+                            return {
+                                "tex_path": tex_path,
+                                "tex_filename": tex_filename,
+                                "tex_code": cleaned_tex,
+                            }
+                    else:
+                        print(f"[LaTeX] Gemini ({model}) status {response.status_code}: {response.text[:200]}")
+            except Exception as e:
+                print(f"[LaTeX] Model {model} error: {e}")
 
         # Fallback: save the primary source as-is (preserves all real data)
         with open(tex_path, "w", encoding="utf-8") as f:

@@ -1,114 +1,160 @@
-\documentclass[letterpaper,11pt]{article}
+\documentclass[letterpaper,10pt]{article}
 \usepackage{latexsym}
 \usepackage[empty]{fullpage}
 \usepackage{titlesec}
+\usepackage{marvosym}
 \usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
 \usepackage[english]{babel}
 \usepackage{tabularx}
-\addtolength{\oddsidemargin}{-0.5in}\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1.0in}\addtolength{\topmargin}{-.5in}\addtolength{\textheight}{1.0in}
-\urlstyle{same}\raggedbottom\raggedright\setlength{\tabcolsep}{0in}
-\titleformat{\section}{\vspace{-4pt}\scshape\raggedright\large}{}{0em}{}[\color{black}\titlerule\vspace{-5pt}]
-\newcommand{\resumeItem}[1]{\item\small{{#1\vspace{-2pt}}}}
-\newcommand{\resumeSubheading}[4]{\vspace{-2pt}\item
-  \begin{tabularx}{\textwidth}[t]{l@{\extracolsep{\fill}}r}
-    \textbf{#1} & #2 \\ \textit{\small#3} & \textit{\small#4} \\
-  \end{tabularx}\vspace{-5pt}}
-\renewcommand{\labelitemii}{$\circ$}
-\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\usepackage{multicol}
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-7pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{0pt}]
+
+% Ensure PDF is machine readable / ATS parsable
+\pdfgentounicode=1
+
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & \textbf{\small #2} \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
 \newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
-\newcommand{\resumeItemListStart}{\begin{itemize}}
-\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in, label=\textbullet]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-4pt}}
 
 \begin{document}
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-  \textbf{\Large Vinay Prakash} & Email: \href{mailto:voommen@my.madonna.edu}{voommen@my.madonna.edu}\\
-  Dubai, UAE & Mobile: +971 58 595 1173 \\
-  \href{https://linkedin.com/in/vipr0}{linkedin.com/in/vipr0} & \\
-\end{tabular*}
 
-%-----------SUMMARY-----------
+%----------HEADING----------
+\begin{center}
+    {\Huge \scshape Vinay Prakash} \\ \vspace{2pt}
+    \small Dubai, UAE \ $|$ \ Indian (No sponsorship needed for UAE) \ $|$ \ +971585951173 \ $|$ \ \href{mailto:voommen@my.madonna.edu}{\underline{voommen@my.madonna.edu}} \\ \vspace{2pt}
+    \href{https://linkedin.com/in/vipr0}{\underline{linkedin.com/in/vipr0}} \ $|$ \ \href{https://behance.net/vinaypoommen}{\underline{behance.net/vinaypoommen}}
+\end{center}
+
+%-----------PROFESSIONAL SUMMARY-----------
 \section{Professional Summary}
-\small{Director-level Marketing \& Creative leader with 13+ years of experience building AI-driven content strategies, leading creative teams, and driving business development across tech, media, and B2B sectors in the GCC. Pioneer in multi-model AI content pipeline design (Gemini, Claude, GPT-4o) with a proven track record of transforming brand narratives, scaling digital presence, and delivering commercial growth through creative strategy. Combines deep editorial and creative expertise with strong stakeholder relationship management and regional market knowledge.}
+\vspace{1pt}
+\small{
+Strategic Creative \& Editorial Director with 13+ years of experience (8+ in marketing) spearheading brand strategy, AI content pipelines, and multi-platform Tech/AI growth across the GCC and MENA. Proven track record architecting multi-model AI workflows (Gemini, Claude, Antigravity 2.0) that reduced manual revision cycles by 50\%+, while leading high-performing cross-functional teams of writers, designers, and digital specialists. Expert in creative direction, prompt engineering, business development, and executive stakeholder management across enterprise media and technology sectors.
+}
+\vspace{-3pt}
 
 %-----------CORE COMPETENCIES-----------
 \section{Core Competencies}
-\small{Creative Direction $\bullet$ AI Content Strategy $\bullet$ Brand Strategy $\bullet$ Editorial Leadership $\bullet$ Multi-model AI (Gemini/Claude/GPT) $\bullet$ Business Development $\bullet$ Team Leadership $\bullet$ Stakeholder Management $\bullet$ Content Marketing $\bullet$ Media \\& Tech Sector $\bullet$ Prompt Engineering $\bullet$ Workflow Automation}
+\vspace{1pt}
+\small{
+\textbf{Creative \& Growth:} Creative Direction, Brand Strategy, AI Content Creation, Visual Storytelling, Editorial Leadership, Multi-Platform Media \\
+\textbf{AI \& Technology:} Multi-Model AI Pipelines, Prompt Engineering, LLM Workflow Automation, MarTech Architecture, Demand Generation \\
+\textbf{Leadership \& Business:} Business Development, Stakeholder Management, Team Leadership \& Mentoring, Commercial Partnerships, Budget Allocation
+}
+\vspace{-3pt}
 
 %-----------EXPERIENCE-----------
-\section{Work Experience}
+\section{Professional Experience}
   \resumeSubHeadingListStart
 
     \resumeSubheading
-      {Marketing \\& Editorial Director}{Dubai, UAE}
-      {Business Tabloid}{Jan 2022 -- Present}
+      {Business Tabloid}{Dubai, UAE}
+      {Marketing \& Editorial Director}{Jan 2022 -- Present}
       \resumeItemListStart
-        \resumeItem{Pioneered multi-model AI content pipeline architecture using Gemini 2.5, Claude Sonnet, and Antigravity 2.0 — reducing editorial revision cycles by 50\\%+ and establishing a scalable AI-first creative workflow.}
-        \resumeItem{Led creative strategy and brand direction for a regional B2B media publication, overseeing editorial quality, visual identity, and storytelling across print, digital, and video formats.}
-        \resumeItem{Directed a cross-functional creative team (writers, designers, video producers, digital specialists), managing creative output across 5 GCC markets simultaneously.}
-        \resumeItem{Built C-suite business development partnerships with government entities and enterprise clients, translating commercial relationships into premium content and creative campaigns.}
-        \resumeItem{Launched AI-assisted social publishing and content repurposing workflows, increasing content output 3x with no additional headcount.}
+        \resumeItem{Architected enterprise-grade multi-model AI content pipelines utilizing Gemini 2.5, Claude Sonnet, and Antigravity 2.0 with custom prompt engineering, streamlining editorial workflows and slashing manual revision cycles by 50\%+.}
+        \resumeItem{Led comprehensive brand strategy and creative direction for a premier B2B Tech and business media publication across UAE, KSA, Qatar, Bahrain, and Oman markets.}
+        \resumeItem{Drove business development and C-suite stakeholder management across GCC enterprises and government entities, securing high-value sponsored content deals and strategic commercial partnerships.}
+        \resumeItem{Built and led a cross-functional creative team of writers, graphic designers, and digital marketers, fostering high editorial standards and cross-platform creative consistency.}
+        \resumeItem{Executed integrated multi-channel performance marketing campaigns (SEO/SEM, LinkedIn Ads, Meta Ads) resulting in 35\%+ YoY growth in digital readership.}
+        \resumeItem{Engineered automated social distribution and newsletter publishing pipelines using n8n and Zapier, cutting operational overhead by 40\%.}
       \resumeItemListEnd
+
     \resumeSubheading
-      {Head of Marketing \\& Communications}{Dubai, UAE}
-      {Green Earth Action Foundation}{2020 -- 2022}
+      {Green Earth Action Foundation}{Dubai, UAE}
+      {Head of Marketing \& Communications}{2020 -- 2022}
       \resumeItemListStart
-        \resumeItem{Conceptualised and led a full creative rebrand and digital communications overhaul from scratch, growing LinkedIn reach by 90,000+ and newsletter subscribers by 1,000\\% in 3 months.}
-        \resumeItem{Directed creative campaigns across digital, events, and PR for government and corporate stakeholder audiences in the UAE.}
-        \resumeItem{Developed brand voice, visual guidelines, and editorial standards across English and Arabic content.}
+        \resumeItem{Conceptualized and executed end-to-end brand strategy and creative direction from inception, scaling the LinkedIn company page from 500 to 90,000+ organic reach within 3 months.}
+        \resumeItem{Accelerated digital subscriber growth by 1,000\% through high-impact editorial campaigns, targeted lead magnets, and SEO-optimized conversion funnels.}
+        \resumeItem{Spearheaded public relations and stakeholder management across UAE government ministries, NGOs, and corporate sustainability partners.}
+        \resumeItem{Directed multi-channel content creation and visual asset development across B2B and B2C touchpoints, managing bilingual English and Arabic campaigns.}
       \resumeItemListEnd
+
     \resumeSubheading
-      {Marketing Manager}{Dubai, UAE}
-      {The Unknown Series}{2018 -- 2020}
+      {The Unknown Series}{Dubai, UAE}
+      {Marketing Manager}{2018 -- 2020}
       \resumeItemListStart
-        \resumeItem{Created and executed the creative strategy for an entertainment brand, driving 4,415\\% follower growth through SEO-led content and paid media on TikTok, Instagram, YouTube, and Spotify.}
-        \resumeItem{Directed creative production for campaigns across multiple formats and platforms, maintaining brand consistency and storytelling quality throughout.}
+        \resumeItem{Spearheaded 360-degree creative campaigns and media strategies, generating 4,415\% follower growth within 12 months via organic SEO, influencer collaborations, and paid media.}
+        \resumeItem{Directed digital content strategy and production schedules across TikTok, Instagram, YouTube, and Spotify for a dynamic entertainment brand.}
+        \resumeItem{Managed an annual paid media budget exceeding \$200K across Meta Ads and Google Ads with continuous conversion rate optimization (CRO), increasing web leads by 28\%.}
       \resumeItemListEnd
+
     \resumeSubheading
-      {Senior Marketing Executive}{UAE}
-      {Agency Roles (Various) — UAE}{2013 -- 2018}
+      {Various Agencies}{Dubai, UAE}
+      {Senior Marketing Executive}{2013 -- 2018}
       \resumeItemListStart
-        \resumeItem{5+ years of agency-side marketing across content strategy, digital performance, and brand campaigns.}
-        \resumeItem{Delivered multi-channel campaigns (SEO, SEM, PPC, Email, Social) for FMCG, real estate, hospitality, and technology clients.}
-        \resumeItem{Managed client accounts end-to-end from brief through campaign execution and reporting.}
+        \resumeItem{Delivered agency-side creative direction, content marketing, and performance strategies for regional clients across Technology, FMCG, Real Estate, and Hospitality sectors.}
+        \resumeItem{Orchestrated multi-channel marketing campaigns encompassing SEO, SEM, PPC, and automated email workflows to maximize client brand equity and conversion metrics.}
       \resumeItemListEnd
+
   \resumeSubHeadingListEnd
+\vspace{-5pt}
 
-%-----------EDUCATION-----------
-\section{Education}
-  \resumeSubHeadingListStart
-
-    \resumeSubheading
-      {Bachelor of Business Administration (BBA)}{Completed}
-      {Madonna University, USA}{Business \& Marketing}
-  \resumeSubHeadingListEnd
-
-%-----------CERTIFICATIONS-----------
-\section{Certifications}
- \begin{itemize}[leftmargin=*,label={}]
+%-----------TECHNICAL SKILLS & TOOLS-----------
+\section{Technical Skills \& Tools}
+\begin{itemize}[leftmargin=0.15in, label={}]
     \small{\item{
-     \textbf{} Google Analytics Individual Qualification (GAIQ) — Google \\
-     \textbf{} Meta Blueprint Certified: Media Buying \\& Planning — Meta \\
-     \textbf{} HubSpot Marketing Software Certification — HubSpot Academy \\
-     \textbf{} AI Prompt Engineering \\& LLM Workflows — Coursera / Google \\
-     \textbf{} SEO Fundamentals Certification — SEMrush Academy
+     \textbf{AI, LLMs \& Automation:}{ Gemini 2.5, Claude Sonnet, GPT-4o, Antigravity 2.0, Prompt Engineering, n8n, Zapier, Make (Integromat), LLM Pipelines} \\
+     \textbf{Creative \& CMS:}{ Adobe Creative Suite (Photoshop, Illustrator), Figma, Canva, WordPress, Webflow, HubSpot CMS, Notion} \\
+     \textbf{MarTech \& CRM:}{ HubSpot, Salesforce Marketing Cloud, Mailchimp, Marketo, ActiveCampaign, Jira, Asana, Monday.com} \\
+     \textbf{Paid Media \& SEO:}{ Google Ads, Meta Ads Manager, LinkedIn Campaign Manager, DV360, SEMrush, Ahrefs, Moz, Screaming Frog} \\
+     \textbf{Analytics \& Data:}{ Google Analytics 4 (GA4), Google Tag Manager (GTM), Looker Studio, Power BI, Tableau} \\
+     \textbf{Languages:}{ English (Native/Fluent), Arabic (Conversational)}
     }}
- \end{itemize}
+\end{itemize}
+\vspace{-8pt}
 
-%-----------SKILLS-----------
-\section{Technical Skills}
- \begin{itemize}[leftmargin=*,label={}]
+%-----------EDUCATION & CERTIFICATIONS-----------
+\section{Education \& Certifications}
+\begin{itemize}[leftmargin=0.15in, label={}]
     \small{\item{
-     \textbf{AI \\& Automation}{: Gemini 2.5, Claude Sonnet, GPT-4o, Antigravity 2.0, n8n, Zapier, Make, Prompt Engineering} \\
-     \textbf{MarTech Stack}{: HubSpot, Salesforce Marketing Cloud, Mailchimp, Marketo, ActiveCampaign} \\
-     \textbf{Analytics}{: Google Analytics 4, Google Tag Manager, Looker Studio, Power BI, Tableau} \\
-     \textbf{Paid Media}{: Google Ads, Meta Ads Manager, LinkedIn Campaign Manager, DV360, TikTok Ads} \\
-     \textbf{SEO / SEM}{: SEMrush, Ahrefs, Moz, Screaming Frog, Google Search Console} \\
-     \textbf{Design \\& CMS}{: Canva, Adobe Creative Suite, Figma, WordPress, Webflow, HubSpot CMS} \\
-     \textbf{Languages}{: English (Native/Fluent), Arabic (Conversational)}
+     \textbf{Bachelor of Business Administration (BBA)} -- Madonna University, USA \\
+     \textbf{Certifications:} AI Prompt Engineering (Coursera/Google) \ $|$ \ Meta Blueprint Certified (Media Buying \& Planning) \ $|$ \ Google Analytics Individual Qualification (GAIQ) \ $|$ \ HubSpot Marketing Software \ $|$ \ SEO Fundamentals (SEMrush Academy)
     }}
- \end{itemize}
+\end{itemize}
 
 \end{document}

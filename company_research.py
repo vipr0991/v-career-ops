@@ -54,7 +54,7 @@ Return ONLY valid JSON with this exact structure:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
                     headers={"Content-Type": "application/json"},
                     params={"key": self.gemini_key},
                     json={
@@ -118,7 +118,7 @@ Return ONLY valid JSON with this exact structure:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
                     headers={"Content-Type": "application/json"},
                     params={"key": self.gemini_key},
                     json={

@@ -1,115 +1,148 @@
-\documentclass[letterpaper,11pt]{article}
+\documentclass[letterpaper,10pt]{article}
 \usepackage{latexsym}
 \usepackage[empty]{fullpage}
 \usepackage{titlesec}
+\usepackage{marvosym}
 \usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
 \usepackage[english]{babel}
 \usepackage{tabularx}
-\addtolength{\oddsidemargin}{-0.5in}\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1.0in}\addtolength{\topmargin}{-.5in}\addtolength{\textheight}{1.0in}
-\urlstyle{same}\raggedbottom\raggedright\setlength{\tabcolsep}{0in}
-\titleformat{\section}{\vspace{-4pt}\scshape\raggedright\large}{}{0em}{}[\color{black}\titlerule\vspace{-5pt}]
-\newcommand{\resumeItem}[1]{\item\small{{#1\vspace{-2pt}}}}
-\newcommand{\resumeSubheading}[4]{\vspace{-2pt}\item
-  \begin{tabularx}{\textwidth}[t]{l@{\extracolsep{\fill}}r}
-    \textbf{#1} & #2 \\ \textit{\small#3} & \textit{\small#4} \\
-  \end{tabularx}\vspace{-5pt}}
-\renewcommand{\labelitemii}{$\circ$}
-\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
-\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
-\newcommand{\resumeItemListStart}{\begin{itemize}}
-\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+\usepackage{fontawesome}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.0in}
+\addtolength{\topmargin}{-.6in}
+\addtolength{\textheight}{1.2in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-6pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-2pt}]
+
+% Ensure generated PDF is machine readable/ATS parsable
+\pdfgentounicode=1
+
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & \textbf{\small #2} \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in, label={\tiny$\bullet$}]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-4pt}}
 
 \begin{document}
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-  \textbf{\Large Vinay Prakash} & Email: \href{mailto:voommen@my.madonna.edu}{voommen@my.madonna.edu}\\
-  Dubai, UAE & Mobile: +971 58 595 1173 \\
-  \href{https://linkedin.com/in/vipr0}{linkedin.com/in/vipr0} & \\
-\end{tabular*}
 
-%-----------SUMMARY-----------
+%----------HEADING----------
+\begin{center}
+    {\Huge \scshape Vinay Prakash} \\ \vspace{4pt}
+    \small Dubai, UAE \ $|$ \ +971 58 595 1173 \ $|$ \ \href{mailto:voommen@my.madonna.edu}{voommen@my.madonna.edu} \\
+    \href{https://linkedin.com/in/vipr0}{\underline{linkedin.com/in/vipr0}} \ $|$ \ \href{https://behance.net/vinaypoommen}{\underline{behance.net/vinaypoommen}} \ $|$ \ No UAE Sponsorship Needed
+\end{center}
+
+%-----------PROFESSIONAL SUMMARY-----------
 \section{Professional Summary}
-\small{Experienced Head of Marketing \& Communications with 13+ years of expertise in brand strategy, integrated campaign management, PR, social media, and corporate communications across F\&B, hospitality, and consumer brand sectors. Skilled at managing multi-brand portfolios, coordinating agency partnerships, leading marketing teams, and executing high-impact campaigns for new outlet launches, seasonal promotions, and brand events. Proven track record of building brand equity and measurable audience growth in Dubai and GCC.}
+\small{
+Results-driven \textbf{Head of Marketing \& Communications} and brand strategist with 13+ years of progressive experience (8+ in senior marketing leadership) across the UAE and GCC. Proven track record directing integrated \textbf{brand strategy}, high-impact \textbf{PR}, \textbf{influencer marketing}, digital campaigns, and large-scale promotional \textbf{events} across hospitality, media, and consumer sectors. Expert in driving multi-channel engagement, leading high-performing cross-functional teams, and leveraging advanced MarTech and AI automation to accelerate revenue and brand presence.
+}
 
 %-----------CORE COMPETENCIES-----------
 \section{Core Competencies}
-\small{Head of Marketing $\bullet$ Brand Strategy $\bullet$ PR \\& Communications $\bullet$ F\\&B \\& Hospitality Marketing $\bullet$ Social Media Management $\bullet$ Campaign Management $\bullet$ Influencer Marketing $\bullet$ Events \\& Activations $\bullet$ Team Leadership $\bullet$ Agency Management $\bullet$ Consumer Brand Marketing $\bullet$ Multi-brand Portfolio}
+\small{
+\textbf{Strategy \& Leadership:} Integrated Brand Strategy, Marketing Communications, Team Leadership \& Mentoring, Budget Management, Agency \& Vendor Management, Stakeholder Relations \\
+\textbf{Growth \& Campaigns:} Campaign Management, Multi-Channel Demand Generation, PR \& Media Relations, Influencer Partnerships, Event Planning \& Activations, Hospitality \& F\&B Marketing \\
+\textbf{Digital \& MarTech:} Social Media Strategy, Paid Performance Marketing (Meta, Google, LinkedIn), SEO/SEM, CRM \& Automation (HubSpot, Salesforce, n8n, Zapier), AI Workflow Design
+}
 
-%-----------EXPERIENCE-----------
-\section{Work Experience}
-  \resumeSubHeadingListStart
+%-----------WORK EXPERIENCE-----------
+\section{Professional Experience}
+  \resumeSubheadingListStart
 
     \resumeSubheading
-      {Marketing \\& Editorial Director}{Dubai, UAE}
       {Business Tabloid}{Jan 2022 -- Present}
+      {Marketing \& Editorial Director}{Dubai, UAE}
       \resumeItemListStart
-        \resumeItem{Led integrated marketing and communications strategy for a regional media brand, managing multi-channel campaigns (digital, events, PR, partnerships) across 5 GCC markets.}
-        \resumeItem{Managed C-suite and corporate stakeholder relationships, coordinating events, roundtables, and PR communications that supported brand positioning and commercial revenue.}
-        \resumeItem{Directed social media strategy across LinkedIn, Instagram, and Twitter, growing brand audience by 35\\%+ YoY through content-led campaigns and paid amplification.}
-        \resumeItem{Managed agency and vendor relationships for events, design, and media production, ensuring on-brand delivery within budget.}
-        \resumeItem{Led marketing team across editorial, design, and digital functions, setting KPIs and fostering a performance-driven creative culture.}
+        \resumeItem{Spearhead 360-degree \textbf{brand strategy}, marketing communications, and editorial direction across UAE, KSA, Qatar, Bahrain, and Oman markets, expanding regional brand footprint and audience engagement.}
+        \resumeItem{Provide decisive \textbf{team leadership} across cross-functional departments of digital marketers, content creators, and graphic designers, aligning creative output with core commercial targets.}
+        \resumeItem{Drive high-impact commercial partnerships and \textbf{PR} initiatives with C-suite executives, enterprise leaders, and government stakeholders across the GCC region.}
+        \resumeItem{Manage integrated performance and \textbf{social media} marketing campaigns (Meta Ads, LinkedIn Ads, SEO/SEM), delivering 35\%+ YoY growth in digital readership and brand reach.}
+        \resumeItem{Architect multi-model AI content workflows (Gemini, Claude, Antigravity 2.0) and automated publishing pipelines using n8n and Zapier, cutting revision cycles by 50\%+ and operational overhead by 40\%.}
       \resumeItemListEnd
+
     \resumeSubheading
-      {Head of Marketing \\& Communications}{Dubai, UAE}
       {Green Earth Action Foundation}{2020 -- 2022}
+      {Head of Marketing \& Communications}{Dubai, UAE}
       \resumeItemListStart
-        \resumeItem{Delivered full-stack marketing and PR strategy for a UAE consumer-facing brand, including social media management, influencer partnerships, event activations, and media relations.}
-        \resumeItem{Grew LinkedIn reach by 90,000+ and newsletter subscribers by 1,000\\% in 3 months through integrated digital and PR campaigns.}
-        \resumeItem{Coordinated high-visibility events, media briefings, and government engagements, managing all communications and brand representation.}
-        \resumeItem{Managed multi-lingual (English/Arabic) content for B2B and B2C audiences across the UAE and broader GCC.}
+        \resumeItem{Designed and executed end-to-end \textbf{marketing communications} and digital brand strategies from the ground up, establishing the organization's regional profile in \textbf{Dubai} and across the UAE.}
+        \resumeItem{Directed comprehensive \textbf{PR}, media relations, and corporate communications across government bodies, institutional stakeholders, and corporate partners.}
+        \resumeItem{Scaled organic \textbf{social media} reach from 500 to 90,000+ impressions within 3 months and drove a 1,000\% increase in newsletter subscribers through targeted omnichannel content.}
+        \resumeItem{Spearheaded multi-lingual (English/Arabic) campaign management and branded digital collateral for regional community initiatives and stakeholder \textbf{events}.}
       \resumeItemListEnd
+
     \resumeSubheading
-      {Marketing Manager}{Dubai, UAE}
       {The Unknown Series}{2018 -- 2020}
+      {Marketing Manager}{Dubai, UAE}
       \resumeItemListStart
-        \resumeItem{Led brand and social media strategy for an entertainment brand, achieving 4,415\\% follower growth through campaigns across TikTok, Instagram, YouTube, Spotify, and influencer partnerships.}
-        \resumeItem{Managed \\$200K+ paid media budget and coordinated event activations, brand launches, and seasonal promotions.}
+        \resumeItem{Led full-lifecycle \textbf{campaign management} and multi-platform content strategy across Instagram, TikTok, YouTube, and Spotify, generating 4,415\% follower growth in 12 months.}
+        \resumeItem{Managed high-performing \textbf{influencer marketing} partnerships and media collaborations to elevate brand visibility and audience acquisition.}
+        \resumeItem{Administered \$200K+ annual paid advertising budget across Meta and Google Ads, utilizing conversion rate optimization (CRO) to increase website leads by 28\%.}
       \resumeItemListEnd
+
     \resumeSubheading
-      {Senior Marketing Executive}{UAE}
-      {Agency Roles (Various) — UAE}{2013 -- 2018}
+      {Various Marketing Agencies}{2013 -- 2018}
+      {Senior Marketing Executive}{Dubai, UAE}
       \resumeItemListStart
-        \resumeItem{5+ years of agency-side marketing across content strategy, digital performance, and brand campaigns.}
-        \resumeItem{Delivered multi-channel campaigns (SEO, SEM, PPC, Email, Social) for FMCG, real estate, hospitality, and technology clients.}
-        \resumeItem{Managed client accounts end-to-end from brief through campaign execution and reporting.}
+        \resumeItem{Delivered 5+ years of agency-side campaign execution, digital marketing, and \textbf{brand strategy} for premier clients across \textbf{hospitality}, FMCG, real estate, and tech sectors in the UAE.}
+        \resumeItem{Executed multi-channel digital strategies encompassing SEO, SEM, PPC, email marketing, and promotional event campaigns to maximize client ROI and brand reach.}
       \resumeItemListEnd
-  \resumeSubHeadingListEnd
+
+  \resumeSubheadingListEnd
 
 %-----------EDUCATION-----------
 \section{Education}
-  \resumeSubHeadingListStart
-
+  \resumeSubheadingListStart
     \resumeSubheading
-      {Bachelor of Business Administration (BBA)}{Completed}
-      {Madonna University, USA}{Business \& Marketing}
-  \resumeSubHeadingListEnd
+      {Madonna University}{USA}
+      {Bachelor of Business Administration (BBA)}{}
+      \resumeItemListStart
+        \resumeItem{Additional specialized coursework in Digital Marketing and Business Strategy}
+      \resumeItemListEnd
+  \resumeSubheadingListEnd
 
-%-----------CERTIFICATIONS-----------
-\section{Certifications}
- \begin{itemize}[leftmargin=*,label={}]
-    \small{\item{
-     \textbf{} Google Analytics Individual Qualification (GAIQ) — Google \\
-     \textbf{} Meta Blueprint Certified: Media Buying \\& Planning — Meta \\
-     \textbf{} HubSpot Marketing Software Certification — HubSpot Academy \\
-     \textbf{} AI Prompt Engineering \\& LLM Workflows — Coursera / Google \\
-     \textbf{} SEO Fundamentals Certification — SEMrush Academy
-    }}
- \end{itemize}
-
-%-----------SKILLS-----------
-\section{Technical Skills}
- \begin{itemize}[leftmargin=*,label={}]
-    \small{\item{
-     \textbf{AI \\& Automation}{: Gemini 2.5, Claude Sonnet, GPT-4o, Antigravity 2.0, n8n, Zapier, Make, Prompt Engineering} \\
-     \textbf{MarTech Stack}{: HubSpot, Salesforce Marketing Cloud, Mailchimp, Marketo, ActiveCampaign} \\
-     \textbf{Analytics}{: Google Analytics 4, Google Tag Manager, Looker Studio, Power BI, Tableau} \\
-     \textbf{Paid Media}{: Google Ads, Meta Ads Manager, LinkedIn Campaign Manager, DV360, TikTok Ads} \\
-     \textbf{SEO / SEM}{: SEMrush, Ahrefs, Moz, Screaming Frog, Google Search Console} \\
-     \textbf{Design \\& CMS}{: Canva, Adobe Creative Suite, Figma, WordPress, Webflow, HubSpot CMS} \\
-     \textbf{Languages}{: English (Native/Fluent), Arabic (Conversational)}
-    }}
- \end{itemize}
+%-----------CERTIFICATIONS & SKILLS-----------
+\section{Technical Skills \& Certifications}
+\small{
+\textbf{Certifications:} Meta Blueprint Certified (Media Buying \& Planning), Google Analytics Individual Qualification (GAIQ), HubSpot Marketing Software Certification, AI Prompt Engineering (Coursera/Google), SEO Fundamentals (SEMrush Academy) \\
+\textbf{MarTech \& Analytics:} Google Analytics 4, Looker Studio, Google Tag Manager, HubSpot, Salesforce Marketing Cloud, Mailchimp, Marketo, ActiveCampaign, Power BI, Tableau \\
+\textbf{Paid Ads \& SEO:} Meta Ads Manager, LinkedIn Campaign Manager, Google Ads, DV360, SEMrush, Ahrefs, Screaming Frog, Moz \\
+\textbf{Creative \& CMS:} Adobe Creative Suite (Photoshop, Illustrator), Canva, Figma, WordPress, Webflow, HubSpot CMS \\
+\textbf{Languages:} English (Native/Fluent), Arabic (Conversational)
+}
 
 \end{document}

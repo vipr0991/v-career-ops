@@ -1,4 +1,4 @@
-﻿"""
+"""
 Career-Ops FastAPI v4.0.0 â€” Unified Agentic Career Intelligence Engine
 Supports Multi-Location Search (UAE, KSA, Qatar, Bahrain, Oman, Kuwait, Bangalore),
 10-Dimension Line-by-Line AI Scoring, Live Pipeline Management, Deep Company Research,
@@ -910,7 +910,7 @@ User: {req.message}"""
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 res = await client.post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
                     headers={"Content-Type": "application/json"},
                     params={"key": gemini_key},
                     json={
@@ -922,7 +922,7 @@ User: {req.message}"""
                     data = res.json()
                     ans = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
                     if ans:
-                        return {"response": ans, "model": "Gemini 2.5 Flash"}
+                        return {"response": ans, "model": "Gemini Flash"}
         except Exception as e:
             print(f"[Chat] Error: {e}")
 
