@@ -1,6 +1,8 @@
 """
 Direct Scoring Engine for Career-Ops
 Implements deep line-by-line evaluation across 10 dimensions for Vinay Prakash's profile.
+Multi-model support: Moonshot Kimi AI + Google Gemini AI fallback.
+Source of Truth: Vinay_Prakash_Resume_Optimized_6.8
 """
 import os
 import json
@@ -10,31 +12,37 @@ from typing import Optional, Dict, Any, List
 
 CANDIDATE_PROFILE_SUMMARY = """
 Candidate: Vinay Prakash (Dubai, UAE / GCC / Bangalore)
-Headline: Strategic Marketing & Editorial Leader specializing in AI Workflows & MarTech Automation
+Contact: voommen@my.madonna.edu | +971 58 595 1173 | +91 9645591928 | linkedin.com/in/vipr0
+Headline: Strategic Marketing & Editorial Leader specializing in AI Workflows, MarTech Automation & Demand Gen
 Experience: 13+ years overall (8+ in Marketing, Editorial Leadership, Demand Generation, SEO/PPC, Campaigns)
-Core Superpowers:
-- AI-enabled workflow automation & prompt engineering (Antigravity 2.0, Gemini, Claude, LiteLLM)
-- MarTech & Demand Gen (SEO/SEM, HubSpot, Google Analytics, Paid Media, Conversion Optimization)
-- Multi-market campaign leadership across UAE, GCC, and global tech ecosystems
-- Proven Hero Metrics: 50%+ reduction in revision cycles via AI pipelines; 90K+ reach increase & 1000% newsletter growth; 4415% follower growth on SEO/paid media.
-Target Roles: AI Content & Automation Specialist, AI Strategy & Enablement Lead, Marketing Operations Manager, Senior Marketing Manager – MarTech, Head of Digital Marketing.
-Locations: UAE (Primary), Saudi Arabia, Qatar, Bahrain, Oman, Kuwait, Bangalore (India).
+Core Roles & Facts (Master Source: Vinay_Prakash_Resume_Optimized_6.8):
+1. Business Tabloid (Jan 2025 – Present): Marketing & Editorial Director, AI-Driven Content, Workflows & Automation. Built multi-model AI pipelines (Antigravity 2.0, Gemini, Claude, GPT-OSS, Qwen, Kimi, LLMLite), reducing revision cycles by 50%+ and editing effort by 60%+.
+2. Green Earth Action Foundation (May 2024 – Jan 2025): Marketing Manager. Managed $130K budget, reduced long-term costs by 15%, +90K LinkedIn reach, +1000% newsletter, 1,100+ webinar attendees.
+3. Business Tabloid (Aug 2022 – May 2024): Marketing Manager. Led 'The Unknown Series', 4415% follower growth via SEO/paid media, mentored 5 across 12+ campaigns, 200+ monthly leads.
+4. Medialogic (Apr 2020 – Aug 2022): Digital Marketing Manager. Localized PPC/SaaS strategies across UAE, KSA, Oman, Qatar, Bahrain, Kuwait, Jordan, Egypt. -20% CAC, +65K pageviews, +42% conversion rate.
+5. Ecommerce Bay L.L.C (Jan 2018 – Mar 2020): Senior Marketing Executive. 428% organic growth, +18% conversion rate.
+6. Green Energy Solutions Ventilation (Dec 2016 – Dec 2017): Account Manager. HubSpot CRM, +25% team productivity, AED 60K+ sales support.
+7. Zomato (Jun 2015 – Sep 2015): Sales Manager. Secured 20+ contracts, AED 250,000+ ROI.
+8. Sanyo, LG, HP, Etisalat, Panasonic (Jun 2008 – Aug 2012): Marketing & Sales Internships. AED 590K+ ROI.
+Education: MBA (2016) & B.Sc. (2012) in International Business from Madonna University, Livonia.
 """
 
 class DirectScoringClient:
     def __init__(self):
+        self.kimi_key = (
+            os.getenv("KIMI_API_KEY") 
+            or os.getenv("MOONSHOT_API_KEY") 
+            or "sk-kjfAlmZbu0ZEw1X386RQ94piXfk9Cs18l3Td9icHbxPAPXoW"
+        )
         self.gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
         self.timeout = 45.0
 
     async def score_with_gemini(self, job_description: str, job_title: str = "", company: str = "", location: str = "") -> Optional[Dict[str, Any]]:
-        """Score job using Google Gemini API with 10-dimension evaluation rubric."""
-        if not self.gemini_key:
-            return self._heuristic_fallback_score(job_description, job_title, company, location)
-
+        """Score job using Moonshot Kimi AI (with Gemini fallback) against 10-dimension rubric."""
         prompt = f"""You are an executive career evaluator and ATS algorithm specialist.
 Evaluate the following job description line-by-line against the candidate profile.
 
-Candidate Profile:
+Candidate Profile (Source of Truth):
 {CANDIDATE_PROFILE_SUMMARY}
 
 Target Job:
@@ -72,28 +80,62 @@ Perform a comprehensive 10-dimension evaluation and return ONLY valid JSON with 
   "line_by_line_summary": "<2-3 sentence executive match summary>"
 }}"""
 
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
-                    headers={"Content-Type": "application/json"},
-                    params={"key": self.gemini_key},
-                    json={
-                        "contents": [{"parts": [{"text": prompt}]}],
-                        "generationConfig": {"temperature": 0.2}
-                    }
-                )
+        # 1. Try Moonshot Kimi AI
+        if self.kimi_key:
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
+                    response = await client.post(
+                        "https://api.moonshot.ai/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {self.kimi_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": "moonshot-v1-32k",
+                            "messages": [
+                                {"role": "system", "content": "You are a professional ATS and executive recruitment evaluation engine. Respond ONLY in valid JSON."},
+                                {"role": "user", "content": prompt}
+                            ],
+                            "temperature": 0.2,
+                            "max_tokens": 2048
+                        }
+                    )
+                    if response.status_code == 200:
+                        data = response.json()
+                        content = data["choices"][0]["message"]["content"].strip()
+                        json_match = re.search(r'\{[\s\S]*\}', content)
+                        if json_match:
+                            parsed = json.loads(json_match.group())
+                            parsed["source_agent"] = "Moonshot Kimi"
+                            return parsed
+            except Exception as e:
+                print(f"[Scoring] Moonshot Kimi scoring error: {e}")
 
-                if response.status_code == 200:
-                    data = response.json()
-                    content = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-                    json_match = re.search(r'\{[\s\S]*\}', content)
-                    if json_match:
-                        parsed = json.loads(json_match.group())
-                        parsed["source_agent"] = "Gemini 2.5 Flash"
-                        return parsed
-        except Exception as e:
-            print(f"[Scoring] Gemini evaluation error: {e}")
+        # 2. Try Gemini API Fallback
+        if self.gemini_key:
+            for gmodel in ["gemini-3.7-flash", "gemini-flash-latest", "gemini-3.5-flash"]:
+                try:
+                    async with httpx.AsyncClient(timeout=self.timeout) as client:
+                        response = await client.post(
+                            f"https://generativelanguage.googleapis.com/v1beta/models/{gmodel}:generateContent",
+                            headers={"Content-Type": "application/json"},
+                            params={"key": self.gemini_key},
+                            json={
+                                "contents": [{"parts": [{"text": prompt}]}],
+                                "generationConfig": {"temperature": 0.2}
+                            }
+                        )
+
+                        if response.status_code == 200:
+                            data = response.json()
+                            content = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                            json_match = re.search(r'\{[\s\S]*\}', content)
+                            if json_match:
+                                parsed = json.loads(json_match.group())
+                                parsed["source_agent"] = f"Gemini ({gmodel})"
+                                return parsed
+                except Exception as e:
+                    print(f"[Scoring] Gemini ({gmodel}) scoring error: {e}")
 
         return self._heuristic_fallback_score(job_description, job_title, company, location)
 
@@ -109,51 +151,45 @@ Perform a comprehensive 10-dimension evaluation and return ONLY valid JSON with 
         for kw in core_kw:
             if kw in text:
                 score += 3
-                keywords_matched.append(kw)
+                keywords_matched.append(kw.title())
             else:
-                keywords_missing.append(kw)
+                keywords_missing.append(kw.title())
 
-        loc_kw = ["dubai", "uae", "abu dhabi", "saudi", "riyadh", "qatar", "doha", "bangalore", "bengaluru", "remote"]
-        loc_score = 70
-        for lkw in loc_kw:
-            if lkw in text:
-                score += 5
-                loc_score = 95
-                break
-
-        overall = max(40, min(95, score))
-        verdict = "Strong Match (Apply Immediately)" if overall >= 80 else "Stretch Match" if overall >= 65 else "Low Match"
+        score = min(score, 94)
+        verdict = "Strong Match (Apply Immediately)" if score >= 85 else ("Stretch Match" if score >= 70 else "Low Match")
 
         return {
-            "overall_score": overall,
+            "overall_score": score,
             "verdict": verdict,
             "category_scores": {
-                "skills_match": min(95, overall + 2),
-                "experience_match": min(90, overall),
-                "industry_fit": 85,
-                "keyword_ats_match": min(90, overall - 2),
-                "problem_solving_fit": 88,
-                "seniority_fit": 85,
-                "location_visa_fit": loc_score,
-                "education_certification_fit": 85
+                "skills_match": score + 2,
+                "experience_match": score,
+                "industry_fit": score - 3,
+                "keyword_ats_match": score + 1,
+                "problem_solving_fit": score + 4,
+                "seniority_fit": score,
+                "location_visa_fit": 95 if any(x in text for x in ["dubai", "uae", "abu dhabi", "remote", "gcc"]) else 75,
+                "education_certification_fit": 90
             },
             "strengths": [
-                f"Strong match for {title or 'target role'} with 13+ years multidisciplinary experience.",
-                "Deep background in AI workflow automation and multi-channel marketing campaigns.",
-                "Strategic location alignment in the GCC / Bangalore operational footprint."
+                "13+ years overall experience (8+ in Marketing & AI Automation) aligns with seniority requirements",
+                "Proven GCC and UAE track record with verified hero metrics (4415% follower growth, $130K budget optimisation)",
+                "Full-stack capability in marketing automation (HubSpot, Google Analytics, SEO/PPC) and AI workflow pipelines"
             ],
             "missing_gaps": [
-                "Verify specific niche MarTech vendor certifications if explicitly mandated by the job post."
+                "Verify specific vertical industry nuances and preferred proprietary tools mentioned in JD"
             ],
-            "ats_keywords_found": keywords_matched[:6],
-            "ats_keywords_missing": keywords_missing[:3],
+            "ats_keywords_found": keywords_matched[:8],
+            "ats_keywords_missing": keywords_missing[:4],
             "interview_talking_points": [
-                "Highlight 50%+ reduction in revision cycles using multi-model AI pipelines.",
-                "Discuss experience driving 90K+ audience reach and high-conversion demand generation."
+                "Pitch 50%+ reduction in revision cycles and 40%+ faster turnaround on marketing workflows",
+                "Highlight multi-country campaign scaling across UAE/KSA/GCC with $130K+ budget optimisation"
             ],
-            "line_by_line_summary": f"Strong strategic fit for {company or 'the organization'}, with immediate readiness to lead AI-driven marketing and operational expansion.",
-            "source_agent": "Career-Ops Heuristic Evaluator"
+            "line_by_line_summary": f"High-confidence match ({score}%) for {title} at {company}. Strong alignment across AI workflows, brand strategy, and commercial growth.",
+            "source_agent": "Heuristic Rule Engine"
         }
 
+scoring_client = DirectScoringClient()
+
 def get_scoring_client() -> DirectScoringClient:
-    return DirectScoringClient()
+    return scoring_client
