@@ -1,5 +1,5 @@
-"""
-Career-Ops FastAPI v4.0.0 — Unified Agentic Career Intelligence Engine
+﻿"""
+Career-Ops FastAPI v4.0.0 â€” Unified Agentic Career Intelligence Engine
 Supports Multi-Location Search (UAE, KSA, Qatar, Bahrain, Oman, Kuwait, Bangalore),
 10-Dimension Line-by-Line AI Scoring, Live Pipeline Management, Deep Company Research,
 LaTeX Resume Tailoring, 6-Slide Value Proposition PPTX Generation, and LinkedIn Outreach.
@@ -74,7 +74,7 @@ def load_file(path: str, default: str = "") -> str:
     except Exception:
         return default
 
-# ── Data Models ──────────────────────────────────────────────────────────────
+# â”€â”€ Data Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class SearchRequest(BaseModel):
     title: str
@@ -136,7 +136,7 @@ class OptimizeRequest(BaseModel):
     location: Optional[str] = "Dubai, UAE"
     resume_filename: Optional[str] = None  # uploaded resume to use as base
 
-# ── LinkedIn OAuth Endpoints ─────────────────────────────────────────────────
+# â”€â”€ LinkedIn OAuth Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.get("/auth/linkedin/login")
 async def linkedin_login(request: Request):
@@ -243,7 +243,7 @@ async def logout(request: Request):
     request.session.clear()
     return {"status": "logged_out"}
 
-# ── Health & Stats Endpoints ─────────────────────────────────────────────────
+# â”€â”€ Health & Stats Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.get("/health")
 @app.get("/api/health")
@@ -275,7 +275,7 @@ async def get_stats():
         "status": "online"
     }
 
-# ── Multi-Location Live Job Discovery ────────────────────────────────────────
+# â”€â”€ Multi-Location Live Job Discovery â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 REGIONAL_SAMPLE_JOBS = [
     {
@@ -334,7 +334,7 @@ REGIONAL_SAMPLE_JOBS = [
     }
 ]
 
-# ── Multi-Location Live Job Discovery (3-Provider Aggregator) ────────────────
+# â”€â”€ Multi-Location Live Job Discovery (3-Provider Aggregator) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 from jsearch_provider import search_jsearch
 from adzuna_provider import search_adzuna
 
@@ -446,7 +446,7 @@ async def search_live_jobs(req: SearchRequest):
 
     return {"results": verified_results, "total": len(verified_results), "location": req.location}
 
-# ── 10-Dimension Line-by-Line AI Scoring ─────────────────────────────────────
+# â”€â”€ 10-Dimension Line-by-Line AI Scoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.post("/api/score")
 async def score_job(req: ScoreRequest):
@@ -495,7 +495,7 @@ async def score_job(req: ScoreRequest):
         "source_agent": evaluation.get("source_agent", "Career-Ops AI Evaluator")
     }
 
-# ── Resume Upload Endpoint ───────────────────────────────────────────────────
+# â”€â”€ Resume Upload Endpoint â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.post("/api/upload-resume")
 async def upload_resume_endpoint(file: UploadFile = File(...)):
@@ -552,7 +552,7 @@ async def delete_resume(filename: str = Query(...)):
 # Serve uploaded resumes for direct preview and download
 app.mount("/resumes", StaticFiles(directory=RESUMES_DIR), name="resumes")
 
-# ── Resume Active Selection (persistent across sessions) ────────────────────
+# â”€â”€ Resume Active Selection (persistent across sessions) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _active_resume_store_path = os.path.join(BASE_DIR, "data", "active_resume.json")
 
 def _get_active_resume() -> Optional[str]:
@@ -590,47 +590,48 @@ async def set_active_resume(data: dict = Body(...)):
     _set_active_resume(filename)
     return {"status": "set", "filename": filename}
 
-# ── Tailor / Optimize Resume from Job Card ───────────────────────────────────
+# â”€â”€ Tailor / Optimize Resume from Job Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.post("/api/optimize")
 async def optimize_resume(req: OptimizeRequest):
     """
     Called by the Tailor button on the Jobs page.
-    1. Looks up the job's description and scoring data from pipeline.
-    2. Uses the active uploaded resume (if any) as the base context.
-    3. Calls the LaTeX tailoring engine to customise the cv-template.
-    4. Compiles to PDF and returns asset links.
+    Uses BOTH the active uploaded resume (primary) AND cv-template (structure)
+    to generate a tailored LaTeX resume preserving every authentic detail.
     """
-    # Try to get job description + scoring data from pipeline
+    # 1. Get job description + scoring data from pipeline
     item = pipeline_store.get_by_id(req.job_id) or {}
     jd = item.get("description", "")
     score_data = item.get("score") if isinstance(item.get("score"), dict) else {}
 
-    # Optional: read content of active uploaded resume as additional context
-    active_resume_context = ""
+    # 2. Read the active uploaded resume content (PRIMARY SOURCE)
+    uploaded_resume_content = ""
     active_file = req.resume_filename or _get_active_resume()
     if active_file:
         fpath = os.path.join(RESUMES_DIR, os.path.basename(active_file))
         if os.path.exists(fpath):
             try:
-                # For .tex files, read directly; for PDF/DOCX just note the filename
                 if fpath.endswith(".tex"):
                     with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                        active_resume_context = f.read()[:4000]  # trim to safe prompt size
-                else:
-                    active_resume_context = f"[Using uploaded resume as base: {active_file}]"
+                        uploaded_resume_content = f.read()[:6000]
+                elif fpath.endswith((".pdf", ".docx", ".doc")):
+                    uploaded_resume_content = (
+                        f"[Uploaded resume '{active_file}' is a {fpath.split('.')[-1].upper()} file. "
+                        f"Use the cv-template.tex below as the verified experience source and tailor it.]"
+                    )
             except Exception:
                 pass
 
-    # Generate tailored LaTeX resume
+    # 3. Generate tailored LaTeX resume using both sources
     tex_res = await latex_tailor.generate_tailored_resume(
         job_title=req.role,
         company_name=req.company,
         job_description=jd or f"Role: {req.role} at {req.company}, Location: {req.location}",
-        evaluation_data=score_data
+        evaluation_data=score_data,
+        uploaded_resume_content=uploaded_resume_content or None,
     )
 
-    # Compile PDF
+    # 4. Compile PDF
     pdf_path = pdf_compiler.compile_resume_to_pdf(
         req.role, req.company, tex_res.get("tex_code", ""), "Vinay Prakash"
     )
@@ -647,7 +648,7 @@ async def optimize_resume(req: OptimizeRequest):
         "pdf_download_url": f"/api/downloads/pdf/{pdf_filename}" if pdf_filename else None,
     }
 
-# ── Reports Direct Serving ───────────────────────────────────────────────────
+# â”€â”€ Reports Direct Serving â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.get("/reports/{filename}")
 @app.get("/api/reports/{filename}")
@@ -661,7 +662,7 @@ async def get_report_file(filename: str):
 
 app.mount("/reports", StaticFiles(directory=REPORTS_DIR), name="reports")
 
-# ── Pipeline CRUD Endpoints ──────────────────────────────────────────────────
+# â”€â”€ Pipeline CRUD Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.get("/api/pipeline")
 async def get_pipeline(stage: Optional[str] = None, location: Optional[str] = None):
@@ -691,7 +692,7 @@ async def delete_pipeline_item(item_id: str = Query(...)):
         raise HTTPException(404, "Item not found in pipeline")
     return {"status": "deleted", "item_id": item_id}
 
-# ── 1-Click Application Kit Generation ───────────────────────────────────────
+# â”€â”€ 1-Click Application Kit Generation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.post("/api/pipeline/generate-kit")
 async def generate_application_kit(req: GenerateKitRequest):
@@ -757,7 +758,7 @@ async def generate_application_kit(req: GenerateKitRequest):
         "pipeline_item": updated_item
     }
 
-# ── On-Demand Research & Outreach Endpoints ─────────────────────────────────
+# â”€â”€ On-Demand Research & Outreach Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.post("/api/research/company")
 async def research_company_endpoint(req: ResearchRequest):
@@ -781,7 +782,7 @@ async def generate_invite_endpoint(req: InviteRequest):
     )
     return {"invite_note": note, "char_count": len(note), "max_limit": 200}
 
-# ── Job Exclusion & Removal Endpoints ────────────────────────────────────────
+# â”€â”€ Job Exclusion & Removal Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.post("/api/jobs/exclude")
 async def exclude_job_endpoint(req: ExcludeJobRequest):
@@ -811,7 +812,7 @@ async def remove_exclusion_endpoint(item_id: str):
     res = exclusion_store.remove_exclusion(item_id)
     return {"status": "success" if res else "not_found"}
 
-# ── Direct Download Endpoints ────────────────────────────────────────────────
+# â”€â”€ Direct Download Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.get("/api/downloads/{file_type}/{filename}")
 async def download_file(file_type: str, filename: str):
@@ -853,7 +854,7 @@ async def download_file(file_type: str, filename: str):
 
     return FileResponse(target_path, media_type=media_type, filename=filename)
 
-# ── Jobs Listing Endpoint (from reports & pipeline) ─────────────────────────
+# â”€â”€ Jobs Listing Endpoint (from reports & pipeline) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.get("/api/jobs")
 async def get_jobs():
@@ -893,7 +894,7 @@ async def get_jobs():
             pass
     return {"jobs": jobs, "total": len(jobs)}
 
-# ── AI Chat Assistant ────────────────────────────────────────────────────────
+# â”€â”€ AI Chat Assistant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.post("/api/chat")
 async def chat_with_assistant(req: ChatRequest):
@@ -930,7 +931,7 @@ User: {req.message}"""
         "model": "Career-Ops Assistant"
     }
 
-# ── Static Dashboard SPA Serving ─────────────────────────────────────────────
+# â”€â”€ Static Dashboard SPA Serving â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 STATIC_DIST = os.path.join(BASE_DIR, "dashboard-web", "dist")
 ASSETS_DIR = os.path.join(STATIC_DIST, "assets")
@@ -956,5 +957,6 @@ async def serve_spa(full_path: str):
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", "5000"))
-    print(f"[Career-Ops] API v4.0.0 — http://0.0.0.0:{port}")
+    print(f"[Career-Ops] API v4.0.0 â€” http://0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+
