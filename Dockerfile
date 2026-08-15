@@ -27,6 +27,7 @@ COPY *.py ./
 COPY config/ ./config/
 COPY templates/ ./templates/
 COPY data/ ./data/
+COPY reports/ ./reports/
 
 RUN mkdir -p reports output resumes latex_resumes data
 

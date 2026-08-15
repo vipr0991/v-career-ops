@@ -203,16 +203,63 @@ REGIONAL_SAMPLE_JOBS = [
     }
 ]
 
+# ── Multi-Location Live Job Discovery (3-Provider Aggregator) ────────────────
+from jsearch_provider import search_jsearch
+from adzuna_provider import search_adzuna
+
+@app.post("/api/search")
 @app.post("/api/search-live")
 async def search_live_jobs(req: SearchRequest):
     """
-    Multi-location search across 7 regions:
+    Multi-location live search across 7 regions:
     UAE, Saudi Arabia, Qatar, Bahrain, Oman, Kuwait, and Bangalore (India).
-    Aggregates SerpAPI, JSearch, Adzuna, and curated live feeds.
+    Aggregates:
+      1. JSearch API (RapidAPI - LinkedIn, Indeed, Glassdoor)
+      2. Adzuna API (RapidAPI - Global job board aggregator)
+      3. SerpAPI (Google Jobs search engine)
+      4. Live verified opportunity store (with sendable direct application URLs)
     """
     results = []
     
-    # 1. Check SerpAPI
+    # 1. Query JSearch API
+    jsearch_key = os.getenv("JSEARCH_API_KEY", "")
+    if jsearch_key:
+        try:
+            j_res = await search_jsearch(title=req.title, location=req.location, currency=req.currency)
+            for j in j_res:
+                results.append({
+                    "id": j.id,
+                    "title": j.title,
+                    "company": j.company,
+                    "location": j.location,
+                    "salary_range": j.salary_range,
+                    "source": f"JSearch ({j.source})",
+                    "url": j.url,
+                    "description": j.description
+                })
+        except Exception as e:
+            print(f"[Search] JSearch provider error: {e}")
+
+    # 2. Query Adzuna API
+    adzuna_key = os.getenv("ADZUNA_API_KEY", "")
+    if adzuna_key:
+        try:
+            a_res = await search_adzuna(title=req.title, location=req.location, currency=req.currency)
+            for a in a_res:
+                results.append({
+                    "id": a.id,
+                    "title": a.title,
+                    "company": a.company,
+                    "location": a.location,
+                    "salary_range": a.salary_range,
+                    "source": f"Adzuna ({a.source})",
+                    "url": a.url,
+                    "description": a.description
+                })
+        except Exception as e:
+            print(f"[Search] Adzuna provider error: {e}")
+
+    # 3. Query SerpAPI (Google Jobs)
     serpapi_key = os.getenv("SERPAPI_KEY", "")
     if serpapi_key:
         try:
@@ -234,20 +281,26 @@ async def search_live_jobs(req: SearchRequest):
         except Exception as e:
             print(f"[Search] SerpAPI error: {e}")
 
-    # 2. Filter / Combine with Regional Opportunities
-    loc_norm = req.location.lower()
-    for idx, sample in enumerate(REGIONAL_SAMPLE_JOBS):
-        if loc_norm in sample["location"].lower() or loc_norm in ["all", "middle east", "gcc", "global", "uae"]:
-            results.append({
-                "id": f"reg-{int(time.time())}-{idx}",
-                **sample
-            })
+    # 4. Include verified saved opportunities from pipeline_store & scan-history
+    saved_items = pipeline_store.get_all()
+    for s in saved_items:
+        results.append({
+            "id": s.get("id", f"pip-{int(time.time())}"),
+            "title": s.get("title", "Target Role"),
+            "company": s.get("company", "Enterprise"),
+            "location": s.get("location", "Dubai, UAE"),
+            "salary_range": s.get("salary_range", "Not Disclosed"),
+            "source": s.get("source", "Verified Match"),
+            "url": s.get("url", ""),
+            "description": s.get("description", ""),
+            "score": s.get("score")
+        })
 
-    # Return deduplicated search listings
+    # Return deduplicated search listings with sendable links
     seen = set()
     deduped = []
     for item in results:
-        key = f"{item['company'].lower()}_{item['title'].lower()}"
+        key = f"{item['company'].lower().strip()}_{item['title'].lower().strip()}"
         if key not in seen:
             seen.add(key)
             deduped.append(item)
@@ -359,6 +412,20 @@ async def delete_resume(filename: str = Query(...)):
 
 # Serve uploaded resumes for direct preview and download
 app.mount("/resumes", StaticFiles(directory=RESUMES_DIR), name="resumes")
+
+# ── Reports Direct Serving ───────────────────────────────────────────────────
+
+@app.get("/reports/{filename}")
+@app.get("/api/reports/{filename}")
+async def get_report_file(filename: str):
+    """Serve full STAR-metrics evaluation markdown reports."""
+    clean_name = os.path.basename(filename)
+    report_path = os.path.join(REPORTS_DIR, clean_name)
+    if os.path.exists(report_path):
+        return FileResponse(report_path, media_type="text/markdown")
+    raise HTTPException(status_code=404, detail="Report not found")
+
+app.mount("/reports", StaticFiles(directory=REPORTS_DIR), name="reports")
 
 # ── Pipeline CRUD Endpoints ──────────────────────────────────────────────────
 
