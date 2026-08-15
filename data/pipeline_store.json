@@ -13,7 +13,69 @@
       "score": 90,
       "report_file": "001-clifford-chance-2026-08-14.md",
       "created_at": 1786795168.2843761,
-      "updated_at": 1786795168.2843761
+      "updated_at": "2026-08-16 01:30:58",
+      "company_research": {
+        "company_name": "Clifford Chance",
+        "business_model": "Clifford Chance operates high-growth enterprise/consumer operations in the Dubai, UAE market.",
+        "key_products_services": [
+          "Digital Products & Technology Services",
+          "Regional Market Operations",
+          "Strategic Customer Solutions"
+        ],
+        "market_position_and_competitors": "Recognized player in regional expansion, competing with tier-1 market leaders.",
+        "recent_initiatives_news": [
+          "Active regional hiring and expansion in Dubai, UAE.",
+          "Digital transformation and automation upgrades across marketing and operations."
+        ],
+        "strategic_pain_points": [
+          "Scaling marketing output without linear headcount increases.",
+          "Integrating AI-assisted pipelines to streamline campaign iteration cycles."
+        ],
+        "hiring_signals": "High demand for strategic talent in Business Development & Marketing Manager 12-month Fixed-Term Contract to drive market capture.",
+        "candidate_solutions_to_pitch": [
+          "Implement automated multi-model AI workflows (50%+ reduction in revision turnaround).",
+          "Deploy targeted demand-generation funnels to accelerate lead acquisition.",
+          "Build scalable editorial and content systems for multi-market reach."
+        ],
+        "interview_talking_points": [
+          "How Clifford Chance currently handles cross-channel content velocity and AI pipeline integration.",
+          "Proven strategies for accelerating GCC campaign reach and brand authority."
+        ]
+      },
+      "decision_makers": [
+        {
+          "role_category": "Executive / Founder",
+          "target_title": "CEO / Founder / Managing Director",
+          "relevance": "Strategic business leader",
+          "recommended_angle": "Focus on high-leverage ROI, automation, and regional scale",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=Clifford+Chance+CEO",
+          "outreach_note_200_char": "Hi [Name], loved Clifford Chance's recent growth! As an AI & MarTech Lead in Dubai, I'd love to connect & share workflow optimization ideas."
+        },
+        {
+          "role_category": "Hiring Manager",
+          "target_title": "VP of Marketing / CMO / Head of Growth",
+          "relevance": "Direct leadership for marketing & operations",
+          "recommended_angle": "Pitch AI campaign automation and multi-channel demand gen",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=Clifford+Chance+Marketing+Head",
+          "outreach_note_200_char": "Hi [Name], impressed by your team's work at Clifford Chance. I lead AI MarTech pipelines in the UAE and would value connecting!"
+        },
+        {
+          "role_category": "Talent Acquisition",
+          "target_title": "Lead Talent Acquisition / Executive Recruiter",
+          "relevance": "Hiring coordinator and pipeline gatekeeper",
+          "recommended_angle": "Immediate availability for UAE/GCC leadership roles",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=Clifford+Chance+Recruiter",
+          "outreach_note_200_char": "Hi [Name], reaching out regarding senior AI & marketing roles at Clifford Chance. Excited about your team's expansion—let's connect!"
+        }
+      ],
+      "tailored_resume_tex": "3.1_Vinay_CliffordChance_Resume.tex",
+      "tailored_resume_pdf": "3.1_Vinay_CliffordChance_Resume.pdf",
+      "presentation_deck": "value-prop-clifford-chance-1786824058.pptx",
+      "linkedin_outreach": {
+        "status": "prepared",
+        "prepared_at": "2026-08-16 01:30:58"
+      },
+      "dedup_key": "cliffordchance_businessdevelopmentmarketingmanager12monthfixedtermcontract_dubai"
     },
     {
       "id": "job-002-3s-group-2026-06-08",
@@ -24,11 +86,73 @@
       "url": "https://ae.indeed.com/viewjob?jk=65d70056adfc30a3",
       "source": "Career-Ops Evaluator",
       "description": "Vinay is a highly skilled marketing and editorial leader with a strong track record in driving growth, revenue, and operational efficiency through AI-enabled workflows. While his marketing and business acumen are excellent, he lacks direct experience managing an app development division, which is a core requirement of this role.",
-      "stage": "pipeline_saved",
+      "stage": "assets_generated",
       "score": 68,
       "report_file": "002-3s-group-2026-06-08.md",
       "created_at": 1786791568.2843761,
-      "updated_at": 1786795168.2843761
+      "updated_at": "2026-08-16 01:31:26",
+      "company_research": {
+        "company_name": "3S group",
+        "business_model": "3S group operates high-growth enterprise/consumer operations in the Dubai, UAE market.",
+        "key_products_services": [
+          "Digital Products & Technology Services",
+          "Regional Market Operations",
+          "Strategic Customer Solutions"
+        ],
+        "market_position_and_competitors": "Recognized player in regional expansion, competing with tier-1 market leaders.",
+        "recent_initiatives_news": [
+          "Active regional hiring and expansion in Dubai, UAE.",
+          "Digital transformation and automation upgrades across marketing and operations."
+        ],
+        "strategic_pain_points": [
+          "Scaling marketing output without linear headcount increases.",
+          "Integrating AI-assisted pipelines to streamline campaign iteration cycles."
+        ],
+        "hiring_signals": "High demand for strategic talent in Marketing Manager App Development Industry Experience to drive market capture.",
+        "candidate_solutions_to_pitch": [
+          "Implement automated multi-model AI workflows (50%+ reduction in revision turnaround).",
+          "Deploy targeted demand-generation funnels to accelerate lead acquisition.",
+          "Build scalable editorial and content systems for multi-market reach."
+        ],
+        "interview_talking_points": [
+          "How 3S group currently handles cross-channel content velocity and AI pipeline integration.",
+          "Proven strategies for accelerating GCC campaign reach and brand authority."
+        ]
+      },
+      "decision_makers": [
+        {
+          "role_category": "Executive / Founder",
+          "target_title": "CEO / Founder / Managing Director",
+          "relevance": "Strategic business leader",
+          "recommended_angle": "Focus on high-leverage ROI, automation, and regional scale",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=3S+group+CEO",
+          "outreach_note_200_char": "Hi [Name], loved 3S group's recent growth! As an AI & MarTech Lead in Dubai, I'd love to connect & share workflow optimization ideas."
+        },
+        {
+          "role_category": "Hiring Manager",
+          "target_title": "VP of Marketing / CMO / Head of Growth",
+          "relevance": "Direct leadership for marketing & operations",
+          "recommended_angle": "Pitch AI campaign automation and multi-channel demand gen",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=3S+group+Marketing+Head",
+          "outreach_note_200_char": "Hi [Name], impressed by your team's work at 3S group. I lead AI MarTech pipelines in the UAE and would value connecting!"
+        },
+        {
+          "role_category": "Talent Acquisition",
+          "target_title": "Lead Talent Acquisition / Executive Recruiter",
+          "relevance": "Hiring coordinator and pipeline gatekeeper",
+          "recommended_angle": "Immediate availability for UAE/GCC leadership roles",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=3S+group+Recruiter",
+          "outreach_note_200_char": "Hi [Name], reaching out regarding senior AI & marketing roles at 3S group. Excited about your team's expansion—let's connect!"
+        }
+      ],
+      "tailored_resume_tex": "9.1_Vinay_3SGroup_Resume.tex",
+      "tailored_resume_pdf": "9.1_Vinay_3SGroup_Resume.pdf",
+      "presentation_deck": "value-prop-3s-group-1786824086.pptx",
+      "linkedin_outreach": {
+        "status": "prepared",
+        "prepared_at": "2026-08-16 01:31:26"
+      },
+      "dedup_key": "3sgroup_marketingmanagerappdevelopmentindustryexperience_dubai"
     },
     {
       "id": "job-002-deal-holdings-2026-08-14",
@@ -39,11 +163,73 @@
       "url": "https://www.gulftalent.com/uae/jobs/social-media-and-brand-marketing-manager-591897",
       "source": "Career-Ops Evaluator",
       "description": "85% match for Head of Marketing & Communications at DEAL Holdings. Vinay brings strong executive marketing leadership, growth acumen, and multi-channel campaign mastery tailored for high-growth consumer and hospitality brands in the UAE.",
-      "stage": "pipeline_saved",
+      "stage": "assets_generated",
       "score": 85,
       "report_file": "002-deal-holdings-2026-08-14.md",
       "created_at": 1786787968.285379,
-      "updated_at": 1786795168.285379
+      "updated_at": "2026-08-16 01:31:56",
+      "company_research": {
+        "company_name": "DEAL Holdings",
+        "business_model": "DEAL Holdings operates high-growth enterprise/consumer operations in the Dubai, UAE market.",
+        "key_products_services": [
+          "Digital Products & Technology Services",
+          "Regional Market Operations",
+          "Strategic Customer Solutions"
+        ],
+        "market_position_and_competitors": "Recognized player in regional expansion, competing with tier-1 market leaders.",
+        "recent_initiatives_news": [
+          "Active regional hiring and expansion in Dubai, UAE.",
+          "Digital transformation and automation upgrades across marketing and operations."
+        ],
+        "strategic_pain_points": [
+          "Scaling marketing output without linear headcount increases.",
+          "Integrating AI-assisted pipelines to streamline campaign iteration cycles."
+        ],
+        "hiring_signals": "High demand for strategic talent in Head of Marketing & Communications (F&B / Hospitality) to drive market capture.",
+        "candidate_solutions_to_pitch": [
+          "Implement automated multi-model AI workflows (50%+ reduction in revision turnaround).",
+          "Deploy targeted demand-generation funnels to accelerate lead acquisition.",
+          "Build scalable editorial and content systems for multi-market reach."
+        ],
+        "interview_talking_points": [
+          "How DEAL Holdings currently handles cross-channel content velocity and AI pipeline integration.",
+          "Proven strategies for accelerating GCC campaign reach and brand authority."
+        ]
+      },
+      "decision_makers": [
+        {
+          "role_category": "Executive / Founder",
+          "target_title": "CEO / Founder / Managing Director",
+          "relevance": "Strategic business leader",
+          "recommended_angle": "Focus on high-leverage ROI, automation, and regional scale",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=DEAL+Holdings+CEO",
+          "outreach_note_200_char": "Hi [Name], loved DEAL Holdings's recent growth! As an AI & MarTech Lead in Dubai, I'd love to connect & share workflow optimization ideas."
+        },
+        {
+          "role_category": "Hiring Manager",
+          "target_title": "VP of Marketing / CMO / Head of Growth",
+          "relevance": "Direct leadership for marketing & operations",
+          "recommended_angle": "Pitch AI campaign automation and multi-channel demand gen",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=DEAL+Holdings+Marketing+Head",
+          "outreach_note_200_char": "Hi [Name], impressed by your team's work at DEAL Holdings. I lead AI MarTech pipelines in the UAE and would value connecting!"
+        },
+        {
+          "role_category": "Talent Acquisition",
+          "target_title": "Lead Talent Acquisition / Executive Recruiter",
+          "relevance": "Hiring coordinator and pipeline gatekeeper",
+          "recommended_angle": "Immediate availability for UAE/GCC leadership roles",
+          "linkedin_search_url": "https://www.linkedin.com/search/results/people/?keywords=DEAL+Holdings+Recruiter",
+          "outreach_note_200_char": "Hi [Name], reaching out regarding senior AI & marketing roles at DEAL Holdings. Excited about your team's expansion—let's connect!"
+        }
+      ],
+      "tailored_resume_tex": "7.1_Vinay_DEALHoldings_Resume.tex",
+      "tailored_resume_pdf": "7.1_Vinay_DEALHoldings_Resume.pdf",
+      "presentation_deck": "value-prop-deal-holdings-1786824116.pptx",
+      "linkedin_outreach": {
+        "status": "prepared",
+        "prepared_at": "2026-08-16 01:31:56"
+      },
+      "dedup_key": "dealholdings_headofmarketingcommunicationsfbhospitality_dubai"
     },
     {
       "id": "job-003-confidential-company-2026-08-15",
@@ -107,7 +293,7 @@
     },
     {
       "id": "job-005-open-innovation-ai-2026-06-08",
-      "title": "Project Manager \u2013 AI Infrastructure & Platforms",
+      "title": "Project Manager – AI Infrastructure & Platforms",
       "company": "Open Innovation AI",
       "location": "Dubai, UAE",
       "salary_range": "AED 25,000 to 45,000 / month",
@@ -122,13 +308,13 @@
     },
     {
       "id": "job-006-quantum-talent-group-2026-08-15",
-      "title": "AVP \u2013 Marketing Business Partnerships, Credit Cards 6 months",
+      "title": "AVP – Marketing Business Partnerships, Credit Cards 6 months",
       "company": "Quantum Talent Group",
       "location": "Dubai, UAE",
       "salary_range": "AED 25,000 to 45,000 / month",
       "url": "https://www.gulftalent.com/uae/jobs/global-influencer-marketing-manager-593305",
       "source": "Career-Ops Evaluator",
-      "description": "75% match for AVP \u2013 Marketing Business Partnerships (Credit Cards) via Quantum Talent Group. Candidate offers strong commercial leadership, growth strategy, and partnership execution capability in Dubai.",
+      "description": "75% match for AVP – Marketing Business Partnerships (Credit Cards) via Quantum Talent Group. Candidate offers strong commercial leadership, growth strategy, and partnership execution capability in Dubai.",
       "stage": "pipeline_saved",
       "score": 75,
       "report_file": "006-quantum-talent-group-2026-08-15.md",
@@ -317,11 +503,11 @@
     },
     {
       "id": "job-018-wow-jobs--wow-softech-pvt--ltd-2026-06-22",
-      "title": "Regional Sales / Marketing Manager \u2013 Construction Equipment (KSA/GCC)",
+      "title": "Regional Sales / Marketing Manager – Construction Equipment (KSA/GCC)",
       "company": "Wow Jobs (Wow Softech Pvt. Ltd)",
       "location": "Dubai, UAE",
       "salary_range": "AED 25,000 to 45,000 / month",
-      "url": "https://www.google.com/search?q=Wow+Jobs+(Wow+Softech+Pvt.+Ltd)+Regional+Sales+/+Marketing+Manager+\u2013+Construction+Equipment+(KSA/GCC)+Dubai+Jobs",
+      "url": "https://www.google.com/search?q=Wow+Jobs+(Wow+Softech+Pvt.+Ltd)+Regional+Sales+/+Marketing+Manager+–+Construction+Equipment+(KSA/GCC)+Dubai+Jobs",
       "source": "Career-Ops Evaluator",
       "description": "Fallback scoring: 95% match.",
       "stage": "assets_generated",
@@ -376,5 +562,5 @@
       "updated_at": 1786795168.290377
     }
   ],
-  "updated_at": 1786795168.290377
+  "updated_at": 1786824116.6493292
 }
