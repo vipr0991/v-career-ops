@@ -375,7 +375,7 @@ export default function PipelinePage({ addToast, onRefresh }) {
               )}
 
               <a
-                href={`${API_BASE}/api/downloads/pdf/resume-${cleanJobString(selectedItemModal.company || 'target').toLowerCase().replace(/[^a-z0-9]/g, '-')}.pdf`}
+                href={`${API_BASE}/api/downloads/pdf/${selectedItemModal.tailored_resume_pdf || ('resume-' + cleanJobString(selectedItemModal.company || 'target').toLowerCase().replace(/[^a-z0-9]/g, '-') + '.pdf')}`}
                 download
                 style={{
                   display: 'flex',

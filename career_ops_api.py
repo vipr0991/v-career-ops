@@ -721,8 +721,30 @@ async def generate_application_kit(req: GenerateKitRequest):
     decision_makers = await company_researcher.find_decision_makers(company)
 
     # 3. LaTeX Resume Customization & PDF Compilation
-    tex_res = await latex_tailor.generate_tailored_resume(title, company, jd, score_data)
-    pdf_path = pdf_compiler.compile_resume_to_pdf(title, company, tex_res.get("tex_code"), "Vinay Prakash")
+    active_resume_content = ""
+    active_file = _get_active_resume()
+    if active_file:
+        fpath = os.path.join(RESUMES_DIR, os.path.basename(active_file))
+        if os.path.exists(fpath) and fpath.endswith(".tex"):
+            try:
+                with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                    active_resume_content = f.read()[:6000]
+            except Exception:
+                pass
+
+    tex_res = await latex_tailor.generate_tailored_resume(
+        job_title=title,
+        company_name=company,
+        job_description=jd or f"Role: {title} at {company}, Location: {location}",
+        evaluation_data=score_data,
+        uploaded_resume_content=active_resume_content or None
+    )
+    pdf_path = pdf_compiler.compile_resume_to_pdf(
+        job_title=title,
+        company_name=company,
+        latex_content=tex_res.get("tex_code"),
+        candidate_name="Vinay Prakash"
+    )
     pdf_filename = os.path.basename(pdf_path)
 
     # 4. PowerPoint Presentation Deck Generation
