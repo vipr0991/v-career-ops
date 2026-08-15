@@ -153,8 +153,9 @@ def score_keywords(desc, title="", company=""):
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 
-@app.get("/")
-async def root():
+@app.get("/health")
+@app.get("/api/health")
+async def health():
     return {"service": "Career-Ops API", "version": "3.5.0", "status": "online"}
 
 @app.get("/api/stats")
