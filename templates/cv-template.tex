@@ -1,123 +1,127 @@
-%-------------------------
-% Career-Ops LaTeX CV Template
-% Based on: Gabriel Sison / sb2nov resume template
-% License: MIT
-%------------------------
+%-------------------------------------------------------------------------------
+% Vinay Prakash — Master Resume Template (LaTeX)
+% Source of Truth: Vinay_Prakash_Resume_Optimized_6.8
+%-------------------------------------------------------------------------------
+\documentclass[10.5pt,a4paper]{article}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Random Stuff %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[letterpaper,11pt]{article}
-\usepackage{latexsym}
-\usepackage[empty]{fullpage}
-\usepackage{titlesec}
-\usepackage{marvosym}
-\usepackage[usenames,dvipsnames]{color}
-\usepackage{verbatim}
+\usepackage[margin=0.55in]{geometry}
 \usepackage{enumitem}
-\usepackage[hidelinks]{hyperref}
-\usepackage{fancyhdr}
-\usepackage[english]{babel}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{hyperref}
 \usepackage{tabularx}
-\usepackage{fontawesome}
-\usepackage{multicol}
-\setlength{\multicolsep}{-3.0pt}
-\setlength{\columnsep}{-1pt}
-\input{glyphtounicode}
-\pagestyle{fancy}
-\fancyhf{} % clear all header and footer fields
-\fancyfoot{}
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}
-% Adjust margins
-\addtolength{\oddsidemargin}{-0.6in}
-\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1.19in}
-\addtolength{\topmargin}{-.7in}
-\addtolength{\textheight}{1.4in}
-\urlstyle{same}
-\raggedbottom
-\raggedright
-\setlength{\tabcolsep}{0in}
-% Sections formatting
-\titleformat{\section}{
-  \vspace{-7pt}\scshape\raggedright\large\bfseries
-}{}{0em}{}[\color{black}\titlerule \vspace{0pt}]
-% Ensure that generate pdf is machine readable/ATS parsable
-\pdfgentounicode=1
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Commands  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\resumeItem}[1]{
-  \item\small{
-    {#1 \vspace{-3pt}}
-  }
-}
-\newcommand{\resumeSubheading}[4]{
-  \vspace{-3pt}\item
-    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
-      \textbf{#1} & \textbf{\small #2} \\
-      \textit{\small#3} & \textit{\small #4} \\
-    \end{tabular*}\vspace{-7pt}
-}
-\newcommand{\resumeSubheadingContinue}[2]{
-  \vspace{-3pt}
-    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
-      \textit{\small#1} & \textit{\small #2} \\
-    \end{tabular*}\vspace{-7pt}
-}
-\newcommand{\resumeProjectHeading}[2]{
-  \vspace{-3pt}\item
-    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
-      \textbf{#1} & \textbf{\small #2} \\
-    \end{tabular*}\vspace{-7pt}
-}
-\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{0pt}}
-\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
-\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
-\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
-\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
-\newcommand{\resumeItemListStart}{\begin{itemize}}
-\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{0pt}}
+\definecolor{primary}{RGB}{20, 20, 20}
+\definecolor{accent}{RGB}{40, 40, 40}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Heading  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section formatting
+\titleformat{\section}{\large\bfseries\scshape\color{primary}}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue!70!black,
+  linkcolor=blue!70!black
+}
+
+\pagestyle{empty}
+
 \begin{document}
-    \begin{center}
-        % NAME
-        {\Huge\scshape {{NAME}}}
-        % SUBHEADING
-        \\ {{CONTACT_LINE}}\\
-        \small
-        % EMAIL
-        \href{mailto:{{EMAIL_URL}}}{\raisebox{-0.2\height}\faEnvelope\  \underline{{{EMAIL_DISPLAY}}}} ~
-        % LINKEDIN
-        \href{{{LINKEDIN_URL}}}{\raisebox{-0.2\height}\faLinkedin\ \underline{{{LINKEDIN_DISPLAY}}}}  ~
-        % GITHUB
-        \href{{{GITHUB_URL}}}{\raisebox{-0.2\height}\faGithub\ \underline{{{GITHUB_DISPLAY}}}}
-    \end{center}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Education  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Education}
-  \resumeSubHeadingListStart
-{{EDUCATION}}
-  \resumeSubHeadingListEnd
+% ==================== HEADER ====================
+\begin{center}
+{\LARGE\bfseries Vinay Prakash}\\[0.3em]
+\small Dubai, United Arab Emirates \ $|$ \ 
+\href{mailto:voommen@my.madonna.edu}{voommen@my.madonna.edu} \ $|$ \ 
++971 58 595 1173 \ $|$ \ 
++91 9645591928 \ $|$ \ 
+\href{https://linkedin.com/in/vipr0}{linkedin.com/in/vipr0} \ $|$ \ 
+\href{https://behance.net/vinaypoommen}{behance.net/vinaypoommen}
+\end{center}
+\vspace{-6pt}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Experience  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Work Experience}
-  \resumeSubHeadingListStart
-{{EXPERIENCE}}
-  \resumeSubHeadingListEnd
+% ==================== PROFESSIONAL SUMMARY ====================
+\section{Summary}
+\small{Strategic marketing and editorial leader with 13+ years of overall experience, including 8+ years in marketing, specialising in brand strategy, content marketing, AI-enabled workflow automation, demand generation, SEO/SEM, PR, and growth-focused communications. Delivered 4415\% follower growth, 3M+ audience reach, and \$130K+ budget optimisation while building scalable systems that improved marketing efficiency, content consistency, and commercial impact.}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  PROJECTS  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Personal Projects}
-\resumeSubHeadingListStart
-{{PROJECTS}}
-\resumeSubHeadingListEnd
+% ==================== CORE SKILLS ====================
+\section{Core Skills}
+\small{\textbf{Brand Strategy} $\bullet$ \textbf{Content Marketing} $\bullet$ \textbf{Demand Generation} $\bullet$ \textbf{Digital Marketing} $\bullet$ \textbf{SEO/SEM} $\bullet$ \textbf{Marketing Automation} $\bullet$ \textbf{AI Workflow Design} $\bullet$ \textbf{Prompt Engineering} $\bullet$ \textbf{PR \& Communications} $\bullet$ \textbf{Event Marketing} $\bullet$ \textbf{Campaign Management} $\bullet$ \textbf{HubSpot} $\bullet$ \textbf{Google Analytics} $\bullet$ \textbf{Google Ads} $\bullet$ \textbf{CRM} $\bullet$ \textbf{Budget Management} $\bullet$ \textbf{Cross-Functional Leadership}}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Technical Skills  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Technical Skills}
-\vspace{-7pt}
-\begin{itemize}
-[leftmargin=0.15in, label={}]\small{\item{
-{{SKILLS}}
-}}
+% ==================== WORK EXPERIENCE ====================
+\section{Professional Experience}
+
+\noindent\textbf{Marketing \& Editorial Director, AI-Driven Content, Workflows \& Automation} \hfill \textbf{Jan 2025 -- Present}\\
+\textit{Business Tabloid} \hfill \textit{Dubai / Bangalore}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Redesigned marketing and editorial workflows for awards, PR, and executive forums, improving turnaround time by 40\%+ and strengthening brand positioning and execution quality.
+  \item Built AI-assisted workflows and applications using Antigravity 2.0, Google Vertex AI, Gemini, Claude, GPT-OSS, Qwen, Kimi, and LLMLite, reducing manual revision cycles by 50\%+ and editing effort by 60\%+.
+  \item Turned award curation, copywriting, research, and outreach into repeatable web-app-based workflows, improving output speed by 2x and reducing dependency on one-off execution.
+  \item Created AI training and multi-model pipelines that improved team adoption by 3x, reduced back-and-forth edits by 70\%, and lowered hands-on operational involvement to roughly 10\%.
 \end{itemize}
+\vspace{4pt}
+
+\noindent\textbf{Marketing Manager} \hfill \textbf{May 2024 -- Jan 2025}\\
+\textit{Green Earth Action Foundation} \hfill \textit{Dubai, UAE}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Revamped LinkedIn and content strategy, increasing reach by 90,000+, newsletter subscribers by 1000\%, and article views to 5,166+ in three months.
+  \item Managed a \$130K budget, reduced long-term marketing costs by 15\%, and increased webinar attendance to 1,100+.
+  \item Improved UAE-Switzerland brand alignment, increasing cross-regional engagement by 26\%, and supported GCC expansion with campaigns that lifted regional lead generation by 23\%.
+\end{itemize}
+\vspace{4pt}
+
+\noindent\textbf{Marketing Manager} \hfill \textbf{Aug 2022 -- May 2024}\\
+\textit{Business Tabloid} \hfill \textit{Dubai, UAE}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Led ``The Unknown Series'' campaigns, delivering 4415\% follower growth through SEO-optimized content and paid media.
+  \item Mentored a team of five across 12+ campaigns, improving content output efficiency by 30\%.
+  \item Generated 200+ monthly leads via hybrid event coverage and managed VIP coordination for the Business Tabloid Award Ceremony with 50+ senior attendees and sponsors.
+\end{itemize}
+\vspace{4pt}
+
+\noindent\textbf{Digital Marketing Manager} \hfill \textbf{Apr 2020 -- Aug 2022}\\
+\textit{Medialogic} \hfill \textit{Dubai, UAE}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Built localised PPC and digital strategies for SaaS clients, driving 645\% social growth across campaigns.
+  \item Launched 5 webinars that generated 150+ qualified leads and improved lead quality by 35\% across 15+ campaigns.
+  \item Optimised multi-country campaigns across UAE, KSA, Oman, Qatar, Bahrain, Kuwait, Jordan, and Egypt, reducing CAC by 20\%, increasing pageviews by 65,000+, and improving conversion rates by 42\%.
+\end{itemize}
+\vspace{4pt}
+
+\noindent\textbf{Senior Marketing Executive} \hfill \textbf{Jan 2018 -- Mar 2020}\\
+\textit{Ecommerce Bay L.L.C} \hfill \textit{Dubai, UAE}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Drove 428\% organic social growth through SEO audits and email drip campaigns across EMEA, Levant, Ireland, and the UK.
+  \item Improved conversion rates by 18\% through branded product photography and videography and reduced campaign costs by 22\% through vendor negotiation.
+\end{itemize}
+\vspace{4pt}
+
+\noindent\textbf{Account Manager} \hfill \textbf{Dec 2016 -- Dec 2017}\\
+\textit{Green Energy Solutions Ventilation} \hfill \textit{Dubai, UAE}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Implemented HubSpot CRM, improved onboarding time by 40\%, and boosted team productivity by 25\% while supporting AED 60,000+ in sales.
+\end{itemize}
+\vspace{4pt}
+
+\noindent\textbf{Sales Manager} \hfill \textbf{Jun 2015 -- Sep 2015}\\
+\textit{Zomato} \hfill \textit{Dubai, UAE}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Exceeded targets by 35\%, secured 20+ client contracts, and delivered AED 250,000+ ROI in 3 months.
+\end{itemize}
+\vspace{4pt}
+
+\noindent\textbf{Marketing \& Sales Internships} \hfill \textbf{Jun 2008 -- Aug 2012}\\
+\textit{Sanyo, LG, HP, Etisalat, Panasonic} \hfill \textit{Dubai, UAE}
+\begin{itemize}[leftmargin=*,nosep,topsep=2pt]
+  \item Supported sales campaigns contributing AED 590K+ ROI and conducted market research that improved customer engagement by 20\%.
+\end{itemize}
+
+% ==================== EDUCATION ====================
+\section{Education}
+\noindent\textbf{MBA in International Business, Minor in Marketing} \hfill \textbf{2016}\\
+\textit{Madonna University, Livonia}\\
+\vspace{2pt}
+\noindent\textbf{B.Sc. in International Business, Minor in Economics} \hfill \textbf{2012}\\
+\textit{Madonna University, Livonia}
 
 \end{document}
