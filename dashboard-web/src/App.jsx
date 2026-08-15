@@ -31,6 +31,9 @@ function getInitialPage() {
 let _toastId = 0
 
 export default function App() {
+  const [authStatus, setAuthStatus] = useState('loading') // 'loading' | 'authenticated' | 'unauthenticated'
+  const [authUser, setAuthUser] = useState(null)
+  
   const [activePage, setActivePage] = useState(getInitialPage)
   const [chatOpen, setChatOpen] = useState(false)
   const [mcpStatus, setMcpStatus] = useState('offline')
@@ -100,6 +103,25 @@ export default function App() {
   }, [])
 
   // ── Initial data load + health poll ──────────────────────────
+  const checkAuth = useCallback(async () => {
+    try {
+      const res = await apiFetch('/api/auth/me')
+      if (res.ok) {
+        const data = await res.json()
+        if (data.authenticated) {
+          setAuthStatus('authenticated')
+          setAuthUser({ name: data.name, email: data.email })
+        } else {
+          setAuthStatus('unauthenticated')
+        }
+      } else {
+        setAuthStatus('unauthenticated')
+      }
+    } catch {
+      setAuthStatus('unauthenticated')
+    }
+  }, [apiFetch])
+
   const refreshData = useCallback(async () => {
     try {
       const [sRes, jRes] = await Promise.all([
@@ -115,10 +137,11 @@ export default function App() {
   }, [apiFetch])
 
   useEffect(() => {
+    checkAuth()
     refreshData()
     const iv = setInterval(refreshData, 15000)
     return () => clearInterval(iv)
-  }, [refreshData])
+  }, [refreshData, checkAuth])
 
   // ── Search ────────────────────────────────────────────────────
   const handleSearch = async (filters) => {
@@ -223,6 +246,28 @@ export default function App() {
   }
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  if (authStatus === 'loading') {
+    return (
+      <div style={{display:'flex',height:'100vh',background:'#111827',color:'#fff',alignItems:'center',justifyContent:'center',fontFamily:'Inter, sans-serif'}}>
+        <div>Loading Career-Ops...</div>
+      </div>
+    )
+  }
+
+  if (authStatus === 'unauthenticated') {
+    return (
+      <div style={{display:'flex',height:'100vh',background:'#111827',color:'#fff',alignItems:'center',justifyContent:'center',fontFamily:'Inter, sans-serif',flexDirection:'column'}}>
+        <div style={{background:'#1f2937',padding:'2rem',borderRadius:'8px',boxShadow:'0 4px 6px rgba(0,0,0,0.3)',width:'100%',maxWidth:'400px',boxSizing:'border-box',textAlign:'center'}}>
+          <h2 style={{marginTop:0,marginBottom:'1.5rem'}}>Career-Ops Sign In</h2>
+          <p style={{color:'#9ca3af',fontSize:'14px',marginBottom:'2rem'}}>Sign in securely with LinkedIn to access your Career-Ops dashboard.</p>
+          <a href="/auth/linkedin/login" style={{display:'inline-block',width:'100%',padding:'0.75rem',borderRadius:'4px',border:'none',background:'#0a66c2',color:'white',fontWeight:'bold',cursor:'pointer',textDecoration:'none',boxSizing:'border-box'}}>
+            Sign In with LinkedIn
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="app-shell">

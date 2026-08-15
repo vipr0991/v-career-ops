@@ -13,6 +13,15 @@ const NAV_BOTTOM = [
 ]
 
 export default function Sidebar({ activePage, onNavigate, mcpStatus, candidateName, isOpen, onClose }) {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.reload();
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
+  }
+
   const handleNav = (id) => {
     onNavigate(id)
     if (onClose) onClose()
@@ -74,15 +83,22 @@ export default function Sidebar({ activePage, onNavigate, mcpStatus, candidateNa
         </div>
 
         <div className="sidebar-footer">
-          <div className="sidebar-avatar">VP</div>
-          <div className="sidebar-user-info">
-            <div className="sidebar-user-name">{candidateName || 'Vinay Prakash'}</div>
-            <div className="sidebar-user-role">Candidate</div>
+          <div style={{display:'flex', width:'100%', alignItems:'center', gap:'12px', paddingBottom:'12px', borderBottom:'1px solid var(--border-color)', marginBottom:'12px'}}>
+            <div className="sidebar-avatar">VP</div>
+            <div className="sidebar-user-info">
+              <div className="sidebar-user-name">{candidateName || 'Vinay Prakash'}</div>
+              <div className="sidebar-user-role">Candidate</div>
+            </div>
+            <div
+              className={`sidebar-status-dot ${mcpStatus === 'offline' ? 'offline' : ''}`}
+              title={mcpStatus === 'online' ? 'Gateway Online' : 'Gateway Offline'}
+              style={{ marginLeft: 'auto' }}
+            />
           </div>
-          <div
-            className={`sidebar-status-dot ${mcpStatus === 'offline' ? 'offline' : ''}`}
-            title={mcpStatus === 'online' ? 'Gateway Online' : 'Gateway Offline'}
-          />
+          <button onClick={handleLogout} className="sidebar-nav-item" style={{color: 'var(--text-secondary)', padding: '8px', fontSize: '14px', width: '100%'}}>
+            <span className="material-symbols-outlined" style={{fontSize: '18px'}}>logout</span>
+            <span>Disconnect LinkedIn</span>
+          </button>
         </div>
       </nav>
     </>

@@ -14,12 +14,13 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import Response, RedirectResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
+import secrets
 
 from pipeline_manager import pipeline_store, exclusion_store
 from direct_scoring import get_scoring_client
@@ -61,6 +62,9 @@ class NoIndexMiddleware(BaseHTTPMiddleware):
         return response
 
 app.add_middleware(NoIndexMiddleware)
+
+session_secret = os.getenv("SESSION_SECRET_KEY", secrets.token_hex(32))
+app.add_middleware(SessionMiddleware, secret_key=session_secret, max_age=86400 * 30)
 
 def load_file(path: str, default: str = "") -> str:
     try:
@@ -119,6 +123,99 @@ class ExcludeJobRequest(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     context: Optional[str] = None
+
+# ── LinkedIn OAuth Endpoints ─────────────────────────────────────────────────
+
+@app.get("/auth/linkedin/login")
+async def linkedin_login(request: Request):
+    client_id = os.getenv("LINKEDIN_CLIENT_ID")
+    redirect_uri = os.getenv("LINKEDIN_REDIRECT_URI", "https://v-career-ops.up.railway.app/auth/linkedin/callback")
+    if not client_id:
+        raise HTTPException(500, "LinkedIn Client ID not configured")
+    
+    state = secrets.token_urlsafe(32)
+    request.session["linkedin_state"] = state
+    
+    auth_url = (
+        f"https://www.linkedin.com/oauth/v2/authorization"
+        f"?response_type=code"
+        f"&client_id={client_id}"
+        f"&redirect_uri={redirect_uri}"
+        f"&state={state}"
+        f"&scope=openid%20profile%20email"
+    )
+    return RedirectResponse(auth_url)
+
+@app.get("/auth/linkedin/callback")
+async def linkedin_callback(request: Request, code: str = None, state: str = None, error: str = None, error_description: str = None):
+    if error:
+        return {"error": error, "description": error_description}
+    if not code or not state:
+        raise HTTPException(400, "Missing code or state")
+    
+    saved_state = request.session.get("linkedin_state")
+    if not saved_state or state != saved_state:
+        raise HTTPException(400, "Invalid OAuth state")
+    
+    del request.session["linkedin_state"]
+    
+    client_id = os.getenv("LINKEDIN_CLIENT_ID")
+    client_secret = os.getenv("LINKEDIN_CLIENT_SECRET")
+    redirect_uri = os.getenv("LINKEDIN_REDIRECT_URI", "https://v-career-ops.up.railway.app/auth/linkedin/callback")
+    
+    async with httpx.AsyncClient() as client:
+        token_res = await client.post(
+            "https://www.linkedin.com/oauth/v2/accessToken",
+            data={
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": redirect_uri,
+                "client_id": client_id,
+                "client_secret": client_secret
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+        if token_res.status_code != 200:
+            raise HTTPException(502, f"Token exchange failed: {token_res.text}")
+        
+        token_data = token_res.json()
+        access_token = token_data.get("access_token")
+        
+        user_res = await client.get(
+            "https://api.linkedin.com/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        if user_res.status_code != 200:
+            raise HTTPException(502, "Failed to fetch user profile")
+            
+        profile = user_res.json()
+        
+        allowed_email = os.getenv("ALLOWED_LINKEDIN_EMAIL")
+        user_email = profile.get("email")
+        if allowed_email and user_email != allowed_email:
+            raise HTTPException(403, f"Unauthorized email: {user_email}")
+            
+        request.session["authenticated"] = True
+        request.session["user_email"] = user_email
+        request.session["user_name"] = profile.get("name")
+        request.session["user_sub"] = profile.get("sub")
+        
+    return RedirectResponse("/")
+
+@app.get("/api/auth/me")
+async def get_current_user(request: Request):
+    if request.session.get("authenticated"):
+        return {
+            "authenticated": True, 
+            "email": request.session.get("user_email"),
+            "name": request.session.get("user_name")
+        }
+    return {"authenticated": False}
+
+@app.post("/api/auth/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return {"status": "logged_out"}
 
 # ── Health & Stats Endpoints ─────────────────────────────────────────────────
 
