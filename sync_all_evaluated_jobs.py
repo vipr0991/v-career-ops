@@ -16,12 +16,11 @@ if os.path.exists(SCAN_HISTORY_PATH):
         for line in f:
             parts = line.strip().split("\t")
             if len(parts) >= 5:
-                # url, first_seen, portal, title, company
                 url, _, portal, title, company = parts[:5]
                 if company.lower() != "company":
                     url_map[company.lower().strip()] = url
 
-# Company fallback URLs
+# Company direct sendable links
 COMPANY_URLS = {
     "clifford chance": "https://ae.indeed.com/viewjob?jk=65d70056adfc30a3",
     "deal holdings": "https://www.gulftalent.com/uae/jobs/social-media-and-brand-marketing-manager-591897",
@@ -43,11 +42,26 @@ COMPANY_URLS = {
     "abbott laboratories": "https://abbott.wd5.myworkdayjobs.com/abbottcareers/job/regional-marketing-manager",
     "coface": "https://careers.coface.com/job/marcomms-manager-dubai",
     "iah group": "https://ae.indeed.com/viewjob?jk=iah-group-marketing-manager",
-    "wow jobs (wow softech pvt. ltd)": "https://www.naukrigulf.com/regional-sales-marketing-manager-jobs",
+    "wow jobs (softech)": "https://www.naukrigulf.com/regional-sales-marketing-manager-jobs",
+    "wow jobs": "https://www.naukrigulf.com/regional-sales-marketing-manager-jobs",
     "3s group": "https://ae.indeed.com/viewjob?jk=65d70056adfc30a3",
-    "revolut ltd": "https://indyama.careerwebsite.com/job/lead-product-marketing-manager/84519783/",
-    "belgravia home healthcare": "https://ae.indeed.com/viewjob?jk=ab6cc2e70b6bb548"
+    "testcorp": "https://www.google.com/search?q=Senior+Marketing+Manager+Dubai"
 }
+
+def clean_text(s: str) -> str:
+    if not s:
+        return ""
+    # Remove letter-by-letter hyphens if present (e.g. -C-l-i-f-f-o-r-d-)
+    if re.search(r"-[a-zA-Z]-", s):
+        s = s.replace("-", "")
+    # Remove leading and trailing dashes and punctuation
+    s = re.sub(r"^[\s\-_|·•]+|[\s\-_|·•]+$", "", s)
+    # Collapse multiple consecutive dashes or spaces into a single clean space
+    s = re.sub(r"[\s\-_]{2,}", " ", s)
+    # Remove trailing city/country info in titles
+    s = re.sub(r"\s*\|\s*Dubai,\s*UAE.*$", "", s, flags=re.IGNORECASE)
+    s = re.sub(r"\s*-\s*Dubai,\s*UAE.*$", "", s, flags=re.IGNORECASE)
+    return s.strip()
 
 all_items = []
 report_files = sorted(glob.glob(os.path.join(REPORTS_DIR, "*.md")))
@@ -66,11 +80,11 @@ for report_path in report_files:
         # Parse header
         comp_m = re.search(r"COMPANY:\s*(.+)", content, re.IGNORECASE)
         if comp_m:
-            company = comp_m.group(1).strip().replace("", "-")
+            company = clean_text(comp_m.group(1).strip())
 
         role_m = re.search(r"ROLE:\s*(.+)", content, re.IGNORECASE)
         if role_m:
-            role = role_m.group(1).strip().replace("", "-")
+            role = clean_text(role_m.group(1).strip())
 
         score_m = re.search(r"SCORE:\s*(\d+)", content, re.IGNORECASE)
         if score_m:
@@ -78,7 +92,7 @@ for report_path in report_files:
 
         loc_m = re.search(r"LOCATION:\s*(.+)", content, re.IGNORECASE)
         if loc_m:
-            location = loc_m.group(1).strip()
+            location = clean_text(loc_m.group(1).strip())
 
         # Parse JSON body if present
         json_match = re.search(r"(\{[\s\S]*\})", content)
@@ -107,7 +121,7 @@ for report_path in report_files:
             "title": role,
             "company": company,
             "location": location,
-            "salary_range": "AED 25,000 - 45,000 / month",
+            "salary_range": "AED 25,000 to 45,000 / month",
             "url": url,
             "source": "Career-Ops Evaluator",
             "description": summary_text,
@@ -125,4 +139,4 @@ for report_path in report_files:
 with open(PIPELINE_STORE, "w", encoding="utf-8") as f:
     json.dump({"items": all_items, "updated_at": time.time()}, f, indent=2)
 
-print(f"Successfully synced ALL {len(all_items)} evaluated jobs into {PIPELINE_STORE}")
+print(f"Successfully cleaned & synced ALL {len(all_items)} evaluated jobs into {PIPELINE_STORE}")

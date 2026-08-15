@@ -209,24 +209,42 @@ export default function App() {
     }
   }
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <div className="app-shell">
-      <Sidebar activePage={activePage} onNavigate={navigate} mcpStatus={mcpStatus} candidateName={stats.candidate_name} />
+      <Sidebar
+        activePage={activePage}
+        onNavigate={navigate}
+        mcpStatus={mcpStatus}
+        candidateName={stats.candidate_name}
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
 
       <div className="main-area">
         <header className="topbar">
-          <div className="topbar-left">
-            <h2 className="topbar-title">{PAGE_TITLES[activePage] || 'Dashboard'}</h2>
-            <span className="topbar-breadcrumb">career-ops / {activePage}</span>
+          <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              className="mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open Navigation Menu"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            <div>
+              <h2 className="topbar-title">{PAGE_TITLES[activePage] || 'Dashboard'}</h2>
+              <span className="topbar-breadcrumb">career-ops / {activePage}</span>
+            </div>
           </div>
           <div className="topbar-right">
             <div className="topbar-status">
               <span className={`status-dot ${mcpStatus === 'offline' ? 'offline' : ''}`} />
-              <span>{mcpStatus === 'online' ? 'Gateway Online' : 'Gateway Offline'}</span>
+              <span className="status-text">{mcpStatus === 'online' ? 'Gateway Online' : 'Gateway Offline'}</span>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={refreshData}>
+            <button className="btn btn-secondary btn-sm" onClick={refreshData} title="Refresh System Data">
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>sync</span>
-              Refresh
+              <span className="refresh-btn-label">Refresh</span>
             </button>
           </div>
         </header>

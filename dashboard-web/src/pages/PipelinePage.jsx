@@ -10,6 +10,19 @@ const STAGES = [
   { key: 'interviewing', label: 'Interviewing', color: '#10b981', icon: 'groups' },
 ]
 
+function cleanJobString(str) {
+  if (!str || typeof str !== 'string') return ''
+  let s = str
+  if (/-[a-zA-Z]-/.test(s)) {
+    s = s.replace(/-/g, '')
+  }
+  s = s.replace(/^[\s\-_|·•]+|[\s\-_|·•]+$/g, '')
+  s = s.replace(/[\s\-_]{2,}/g, ' ')
+  s = s.replace(/\s*\|\s*Dubai,\s*UAE.*$/i, '')
+  s = s.replace(/\s*-\s*Dubai,\s*UAE.*$/i, '')
+  return s.strip ? s.strip() : s.trim()
+}
+
 export default function PipelinePage({ addToast, onRefresh }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
@@ -99,14 +112,14 @@ export default function PipelinePage({ addToast, onRefresh }) {
   })
 
   return (
-    <div className="page-container" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="page-content" id="pipeline-page" style={{ maxWidth: 1400, margin: '0 auto' }}>
       {/* Top Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
             Job Pipeline & Application Command Center
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>
             Track opportunities, generate company research briefs, customized LaTeX resumes, and executive PowerPoint decks.
           </p>
         </div>
@@ -117,7 +130,7 @@ export default function PipelinePage({ addToast, onRefresh }) {
       </div>
 
       {/* Filter Tabs & Location Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
         {/* Stage Filter */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {STAGES.map(s => {
@@ -131,14 +144,14 @@ export default function PipelinePage({ addToast, onRefresh }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,
-                  padding: '8px 14px',
-                  borderRadius: '20px',
+                  padding: '7px 14px',
+                  borderRadius: 20,
                   border: isActive ? `1px solid ${s.color}` : '1px solid rgba(255,255,255,0.08)',
                   background: isActive ? `${s.color}22` : 'rgba(255,255,255,0.03)',
                   color: isActive ? '#fff' : 'var(--text-secondary)',
-                  fontSize: '13px',
+                  fontSize: 12.5,
                   cursor: 'pointer',
-                  fontWeight: isActive ? '600' : 'normal'
+                  fontWeight: isActive ? 600 : 400
                 }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 16, color: s.color }}>{s.icon}</span>
@@ -157,15 +170,8 @@ export default function PipelinePage({ addToast, onRefresh }) {
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: '#1e293b',
-              color: '#fff',
-              fontSize: '13px',
-              cursor: 'pointer'
-            }}
+            className="form-select"
+            style={{ width: 'auto', minWidth: 180 }}
           >
             <option value="All">All Locations</option>
             <option value="UAE">UAE (Dubai / Abu Dhabi)</option>
@@ -181,85 +187,71 @@ export default function PipelinePage({ addToast, onRefresh }) {
 
       {/* Grid of Pipeline Cards */}
       {filteredItems.length === 0 ? (
-        <div style={{ padding: '60px 20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px dashed rgba(255,255,255,0.1)' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--text-secondary)', marginBottom: 12 }}>inbox</span>
-          <h3 style={{ margin: '0 0 8px', fontSize: 16, color: 'var(--text-primary)' }}>No opportunities found in this view</h3>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>
+        <div className="empty-state-box">
+          <span className="material-symbols-outlined empty-state-icon">inbox</span>
+          <h3 style={{ margin: '8px 0', fontSize: 16, color: 'var(--text-primary)' }}>No opportunities found in this view</h3>
+          <p className="empty-state-text">
             Search jobs in the <strong>Jobs</strong> tab or adjust your location and stage filters.
           </p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '16px' }}>
+        <div className="jobs-grid-container">
           {filteredItems.map(item => {
+            const cleanTitle = cleanJobString(item.title)
+            const cleanCompany = cleanJobString(item.company)
+            const cleanLoc = cleanJobString(item.location) || 'Dubai, UAE'
             const scoreVal = typeof item.score === 'object' ? item.score?.overall_score : item.score
             const isKitGenerating = generatingKitId === item.id
             const hasKit = item.presentation_deck || item.tailored_resume_tex || item.company_research
+            const isHigh = scoreVal >= 85
 
             return (
               <div
                 key={item.id}
-                style={{
-                  background: 'rgba(30, 41, 59, 0.7)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '12px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '14px',
-                  position: 'relative'
-                }}
+                className={`job-card-clean ${isHigh ? 'card-high-match' : ''}`}
               >
                 {/* Header: Title & Score Badge */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                  <div>
-                    <h3 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 'bold', color: '#fff' }}>
-                      {item.title}
+                <div className="job-card-top-row">
+                  <div className="job-card-title-group">
+                    <h3 className="job-card-title">
+                      {cleanTitle}
                     </h3>
-                    <div style={{ fontSize: '14px', color: '#38bdf8', fontWeight: '500' }}>
-                      {item.company}
+                    <div className="job-card-company">
+                      {cleanCompany}
                     </div>
                   </div>
                   {scoreVal != null && (
-                    <div style={{
-                      padding: '4px 10px',
-                      borderRadius: '8px',
-                      background: scoreVal >= 85 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                      border: scoreVal >= 85 ? '1px solid #10b981' : '1px solid #3b82f6',
-                      color: scoreVal >= 85 ? '#10b981' : '#3b82f6',
-                      fontWeight: 'bold',
-                      fontSize: '13px'
-                    }}>
+                    <span className={`job-card-match-pill ${isHigh ? 'pill-high' : 'pill-normal'}`}>
                       {scoreVal}% Match
-                    </div>
+                    </span>
                   )}
                 </div>
 
                 {/* Location & Salary Chips */}
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', padding: '3px 8px', borderRadius: 4 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>location_on</span>
-                    {item.location}
+                <div className="job-card-badges-row">
+                  <span className="job-badge location-badge">
+                    <span className="material-symbols-outlined" style={{ fontSize: 13, color: '#38bdf8' }}>location_on</span>
+                    {cleanLoc}
                   </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', padding: '3px 8px', borderRadius: 4 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>payments</span>
-                    {item.salary_range}
+                  <span className="job-badge salary-badge">
+                    <span className="material-symbols-outlined" style={{ fontSize: 13, color: '#10b981' }}>payments</span>
+                    {item.salary_range || 'AED 25,000 to 45,000 / mo'}
                   </span>
                 </div>
 
                 {/* Stage Selector Dropdown */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 12 }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Stage:</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10, marginTop: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Pipeline Stage:</span>
                   <select
                     value={item.stage}
                     onChange={(e) => updateStage(item.id, e.target.value)}
                     style={{
-                      padding: '4px 8px',
-                      borderRadius: '6px',
+                      padding: '4px 10px',
+                      borderRadius: 6,
                       border: '1px solid rgba(255,255,255,0.1)',
                       background: '#0f172a',
                       color: '#38bdf8',
-                      fontSize: '12px',
+                      fontSize: 12,
                       cursor: 'pointer'
                     }}
                   >
@@ -272,32 +264,30 @@ export default function PipelinePage({ addToast, onRefresh }) {
                 </div>
 
                 {/* Action Buttons */}
-                <div style={{ display: 'flex', gap: 8, marginTop: 'auto', flexWrap: 'wrap' }}>
+                <div className="job-card-actions-row">
                   <button
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary btn-sm job-action-score"
                     onClick={() => generateKit(item.id)}
                     disabled={isKitGenerating}
-                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: '12px' }}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                       {hasKit ? 'auto_fix_high' : 'bolt'}
                     </span>
-                    {isKitGenerating ? 'Synthesizing Kit...' : hasKit ? 'Regenerate Kit' : '1-Click App Kit'}
+                    {isKitGenerating ? 'Synthesizing...' : hasKit ? 'Regenerate Kit' : '1-Click App Kit'}
                   </button>
 
                   {hasKit && (
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary btn-sm job-action-save"
                       onClick={() => setSelectedItemModal(item)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '12px' }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
-                      View Assets
+                      Assets
                     </button>
                   )}
 
                   <button
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-secondary btn-sm job-action-apply"
                     onClick={() => deleteItem(item.id)}
                     title="Remove from pipeline"
                     style={{ color: '#ef4444' }}
@@ -313,57 +303,23 @@ export default function PipelinePage({ addToast, onRefresh }) {
 
       {/* Asset Inspection Modal */}
       {selectedItemModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.75)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 9999,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '20px'
-          }}
-          onClick={() => setSelectedItemModal(null)}
-        >
-          <div
-            style={{
-              background: '#0f172a',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '16px',
-              width: '100%',
-              maxWidth: '850px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              padding: '28px',
-              color: '#fff'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-backdrop" onClick={() => setSelectedItemModal(null)}>
+          <div className="modal-content-box" style={{ maxWidth: 850 }} onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 16 }}>
+            <div className="modal-header-row">
               <div>
-                <h2 style={{ margin: '0 0 4px', fontSize: '20px', color: '#38bdf8' }}>
-                  Application Kit: {selectedItemModal.title}
+                <h2 className="modal-title">
+                  Application Kit: {cleanJobString(selectedItemModal.title)}
                 </h2>
-                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  {selectedItemModal.company} • {selectedItemModal.location}
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+                  {cleanJobString(selectedItemModal.company)} · {cleanJobString(selectedItemModal.location)}
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedItemModal(null)}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 24 }}
-              >
-                ✕
-              </button>
+              <button className="modal-close-btn" onClick={() => setSelectedItemModal(null)}>✕</button>
             </div>
 
             {/* Generated Downloads Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, margin: '20px 0' }}>
               {selectedItemModal.presentation_deck && (
                 <a
                   href={`${API_BASE}/api/downloads/output/${selectedItemModal.presentation_deck}`}
@@ -378,8 +334,8 @@ export default function PipelinePage({ addToast, onRefresh }) {
                     border: '1px solid #3b82f6',
                     color: '#60a5fa',
                     textDecoration: 'none',
-                    fontSize: '13px',
-                    fontWeight: 'bold'
+                    fontSize: 13,
+                    fontWeight: 600
                   }}
                 >
                   <span className="material-symbols-outlined">slideshow</span>
@@ -401,8 +357,8 @@ export default function PipelinePage({ addToast, onRefresh }) {
                     border: '1px solid #10b981',
                     color: '#34d399',
                     textDecoration: 'none',
-                    fontSize: '13px',
-                    fontWeight: 'bold'
+                    fontSize: 13,
+                    fontWeight: 600
                   }}
                 >
                   <span className="material-symbols-outlined">description</span>
@@ -413,24 +369,24 @@ export default function PipelinePage({ addToast, onRefresh }) {
 
             {/* Decision Makers & LinkedIn Notes */}
             {selectedItemModal.decision_makers && selectedItemModal.decision_makers.length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: 16, color: '#38bdf8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, color: '#38bdf8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span className="material-symbols-outlined">group</span>
-                  Decision Makers & LinkedIn Invites (200-char max)
+                  Decision Makers & LinkedIn Outreach Notes
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {selectedItemModal.decision_makers.map((dm, idx) => (
-                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                        <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#fff' }}>{dm.target_title}</span>
-                        <a href={dm.linkedin_search_url} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#38bdf8', textDecoration: 'none' }}>
+                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 6 }}>
+                        <span style={{ fontWeight: 600, fontSize: 13.5, color: '#fff' }}>{dm.target_title}</span>
+                        <a href={dm.linkedin_search_url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#38bdf8', textDecoration: 'none' }}>
                           Search on LinkedIn ↗
                         </a>
                       </div>
-                      <p style={{ margin: '0 0 6px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      <p style={{ margin: '0 0 6px', fontSize: 12, color: 'var(--text-secondary)' }}>
                         <strong>Relevance:</strong> {dm.relevance}
                       </p>
-                      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: 6, fontSize: '12px', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px 10px', borderRadius: 6, fontSize: 12, color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.05)' }}>
                         "{dm.outreach_note_200_char}"
                       </div>
                     </div>
@@ -442,14 +398,14 @@ export default function PipelinePage({ addToast, onRefresh }) {
             {/* Company Intelligence Summary */}
             {selectedItemModal.company_research && (
               <div>
-                <h3 style={{ fontSize: 16, color: '#38bdf8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <h3 style={{ fontSize: 15, color: '#38bdf8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span className="material-symbols-outlined">insights</span>
                   Strategic Intelligence & Pitch Solutions
                 </h3>
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: 8, fontSize: '13px', lineHeight: '1.6', color: '#cbd5e1' }}>
-                  <p><strong>Business Model:</strong> {selectedItemModal.company_research.business_model}</p>
-                  <p><strong>Identified Pain Points:</strong> {(selectedItemModal.company_research.strategic_pain_points || []).join(' ')}</p>
-                  <p><strong>Solutions to Pitch:</strong></p>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 8, fontSize: 12.5, lineHeight: 1.6, color: '#cbd5e1' }}>
+                  <p style={{ margin: '0 0 8px' }}><strong>Business Model:</strong> {selectedItemModal.company_research.business_model}</p>
+                  <p style={{ margin: '0 0 8px' }}><strong>Strategic Pain Points:</strong> {(selectedItemModal.company_research.strategic_pain_points || []).join(' ')}</p>
+                  <p style={{ margin: '0 0 4px' }}><strong>Solutions to Pitch:</strong></p>
                   <ul style={{ margin: 0, paddingLeft: 20 }}>
                     {(selectedItemModal.company_research.candidate_solutions_to_pitch || []).map((s, i) => (
                       <li key={i}>{s}</li>
