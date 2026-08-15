@@ -1,6 +1,7 @@
 """
 Company Value Proposition Presentation Generator (.pptx)
 Generates high-contrast, executive-ready presentations with native charts, tables, and structured data visuals.
+Multi-Model Grounded & Strictly Anchored to Vinay_Prakash_Resume_Optimized_6.8.
 """
 import os
 import time
@@ -43,7 +44,7 @@ class PresentationGenerator:
             prs.slide_height = Inches(7.5)
             blank_layout = prs.slide_layouts[6]
 
-            # High-Contrast Light Theme Colors
+            # High-Contrast Executive Theme Colors
             COLOR_WHITE = RGBColor(255, 255, 255)
             COLOR_LIGHT_BG = RGBColor(248, 250, 252) # Slate 50
             COLOR_TEXT_DARK = RGBColor(15, 23, 42)    # Deep Slate / Black
@@ -106,7 +107,6 @@ class PresentationGenerator:
             s1 = prs.slides.add_slide(blank_layout)
             apply_slide_bg(s1)
 
-            # Left Decorative Color Card
             c1 = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.2), Inches(11.733), Inches(5.2))
             c1.fill.solid()
             c1.fill.fore_color.rgb = COLOR_WHITE
@@ -124,63 +124,61 @@ class PresentationGenerator:
             p1.font.color.rgb = COLOR_RED
 
             p2 = tf1.add_paragraph()
-            p2.text = f"Accelerating Market Growth, AI Workflows & Demand Generation"
-            p2.font.size = Pt(30)
+            p2.text = "Accelerating Market Growth, AI Workflows & Demand Generation"
+            p2.font.size = Pt(28)
             p2.font.bold = True
             p2.font.color.rgb = COLOR_NAVY
 
             p3 = tf1.add_paragraph()
-            p3.text = f"Custom Prepared for {company_name} | Role Target: {job_title}"
-            p3.font.size = Pt(18)
+            p3.text = f"Custom Prepared for {company_name} | Target Role: {job_title}"
+            p3.font.size = Pt(17)
             p3.font.bold = True
             p3.font.color.rgb = COLOR_TEXT_DARK
 
             p4 = tf1.add_paragraph()
-            p4.text = f"\nCandidate: {candidate_name} | 13+ Years Marketing Leadership & AI Automation Systems\nFootprint: Dubai, UAE / GCC Regional Markets & Bangalore"
+            p4.text = f"\nCandidate: {candidate_name} | 13+ Years Strategic Marketing Leadership & AI Automation Systems\nRegional Footprint: Dubai, UAE / GCC Multi-Market Ecosystems & Bangalore"
             p4.font.size = Pt(12)
             p4.font.color.rgb = COLOR_TEXT_MUTED
 
-            # ── Slide 2: Market Landscape & Channel Share (With Donut Chart) ──
+            # ── Slide 2: Market Landscape & Growth Distribution (With Donut Chart) ──
             s2 = prs.slides.add_slide(blank_layout)
             add_header(s2, "1. Market Landscape & Growth Distribution", f"Strategic channel allocation to maximize {company_name}'s market presence", "MARKET ANALYSIS")
 
-            biz_model = (research_data or {}).get("business_model", f"{company_name} drives high-growth operations across target regional markets.")
-            mkt_pos = (research_data or {}).get("market_position_and_competitors", "Leading regional innovator competing with tier-1 market leaders.")
+            biz_model = (research_data or {}).get("business_model", f"{company_name} drives high-growth enterprise operations across target regional markets.")
+            mkt_pos = (research_data or {}).get("market_position_and_competitors", "Leading regional innovator competing with tier-1 enterprise market leaders.")
 
-            # Left Text Box
             tb2 = s2.shapes.add_textbox(Inches(0.8), Inches(1.8), Inches(6.2), Inches(4.8))
             tf2 = tb2.text_frame
             tf2.word_wrap = True
 
             p = tf2.paragraphs[0]
             p.text = "Strategic Market Positioning:"
-            p.font.size = Pt(16)
+            p.font.size = Pt(15)
             p.font.bold = True
             p.font.color.rgb = COLOR_NAVY
 
             p = tf2.add_paragraph()
             p.text = f"{biz_model}\n"
-            p.font.size = Pt(12)
+            p.font.size = Pt(11.5)
             p.font.color.rgb = COLOR_TEXT_DARK
 
             p = tf2.add_paragraph()
             p.text = "Competitive Opportunity:"
-            p.font.size = Pt(16)
+            p.font.size = Pt(15)
             p.font.bold = True
             p.font.color.rgb = COLOR_NAVY
 
             p = tf2.add_paragraph()
             p.text = f"{mkt_pos}\n"
-            p.font.size = Pt(12)
+            p.font.size = Pt(11.5)
             p.font.color.rgb = COLOR_TEXT_DARK
 
             p = tf2.add_paragraph()
             p.text = "• AI-driven content orchestration provides an immediate 3x throughput advantage over legacy competitor workflows."
-            p.font.size = Pt(11.5)
+            p.font.size = Pt(11)
             p.font.color.rgb = COLOR_RED
             p.font.bold = True
 
-            # Right Native Doughnut Chart
             chart_data2 = CategoryChartData()
             chart_data2.categories = ['AI Automation & Content', 'Performance Marketing', 'Compounding SEO', 'Enterprise Events']
             chart_data2.add_series('Optimal Growth Mix', (0.35, 0.30, 0.20, 0.15))
@@ -198,7 +196,6 @@ class PresentationGenerator:
             s3 = prs.slides.add_slide(blank_layout)
             add_header(s3, "2. Key Growth Gaps & Impact Assessment", "Diagnosing core bottlenecks vs. the target optimized state", "FRICTION VS SOLUTION")
 
-            # Structured Comparison Table
             rows, cols = 4, 3
             left, top, width, height = Inches(0.8), Inches(1.8), Inches(11.733), Inches(4.8)
             table_shape = s3.shapes.add_table(rows, cols, left, top, width, height)
@@ -245,14 +242,13 @@ class PresentationGenerator:
             s4 = prs.slides.add_slide(blank_layout)
             add_header(s4, "3. Candidate Blueprint & Projected Impact", f"Quantifiable performance acceleration {candidate_name} delivers", "PROJECTED ROI")
 
-            # Left Solutions Text
             tb4 = s4.shapes.add_textbox(Inches(0.8), Inches(1.8), Inches(6.0), Inches(4.8))
             tf4 = tb4.text_frame
             tf4.word_wrap = True
 
             p = tf4.paragraphs[0]
             p.text = "Proven Execution Playbook:"
-            p.font.size = Pt(16)
+            p.font.size = Pt(15)
             p.font.bold = True
             p.font.color.rgb = COLOR_NAVY
 
@@ -273,7 +269,6 @@ class PresentationGenerator:
                 p_sub.font.size = Pt(11)
                 p_sub.font.color.rgb = COLOR_TEXT_DARK
 
-            # Right Native Clustered Column Chart
             chart_data4 = CategoryChartData()
             chart_data4.categories = ['Output Speed', 'Revision Cycles', 'Audience Growth', 'ROAS Velocity']
             chart_data4.add_series('Industry Baseline', (100, 100, 100, 100))
@@ -344,7 +339,6 @@ class PresentationGenerator:
             s6 = prs.slides.add_slide(blank_layout)
             add_header(s6, "5. Executive Summary & Value Proposition", f"Why {candidate_name} is the optimal leadership choice for {company_name}", "FINAL SCORECARD")
 
-            # 3 KPI Callout Cards
             cards_data = [
                 ("13+ Years", "Leadership Mastery", "Proven track record bridging high-level marketing strategy, editorial positioning, and modern AI automation."),
                 ("4,415%", "Audience Expansion", "Documented growth across C-suite decision makers in UAE, Saudi Arabia, Qatar, and wider regional markets."),
