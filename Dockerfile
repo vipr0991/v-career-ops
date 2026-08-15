@@ -15,7 +15,7 @@ RUN pip install --user --no-cache-dir -r requirements.txt
 
 # ── Stage 3: Runtime image ───────────────────────────────────────────────────
 FROM python:3.11-slim
-LABEL maintainer="Career-Ops" version="3.5.0"
+LABEL maintainer="Career-Ops" version="4.0.0"
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
@@ -23,17 +23,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 COPY --from=python-builder /root/.local /root/.local
 COPY --from=frontend-builder /app/dist ./dashboard-web/dist
 
-COPY career_ops_api.py direct_scoring.py adzuna_provider.py jsearch_provider.py ./
+COPY *.py ./
 COPY config/ ./config/
+COPY templates/ ./templates/
+COPY data/ ./data/
 
-RUN mkdir -p reports output resumes latex_resumes
+RUN mkdir -p reports output resumes latex_resumes data
 
 ENV PATH=/root/.local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/api/stats || exit 1
+    CMD curl -f http://localhost:5000/health || exit 1
 
 EXPOSE 5000
 
