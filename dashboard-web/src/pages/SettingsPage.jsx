@@ -186,6 +186,22 @@ export default function SettingsPage({ profile, mcpStatus, addToast }) {
         </div>
       </div>
 
+      {/* Legal & Privacy */}
+      <div className="settings-section">
+        <h3>
+          <span className="material-symbols-outlined" style={{ color: 'var(--accent-primary-light)' }}>policy</span>
+          Legal & Privacy
+        </h3>
+        <div className="settings-row">
+          <div className="settings-row-label">Privacy Policy</div>
+          <div className="settings-row-value">
+            <a href="/privacy-policy" style={{ color: 'var(--accent-primary-light)', textDecoration: 'none' }}>
+              View Privacy Policy
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Refresh Button */}
       <div style={{ display: 'flex', gap: 12 }}>
         <button className="btn btn-secondary" onClick={() => { fetchModels(); addToast('Refreshing system status...', 'info') }}>

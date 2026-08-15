@@ -7,6 +7,7 @@ import PipelinePage from './pages/PipelinePage'
 import ResumeHubPage from './pages/ResumeHubPage'
 import InterviewPrepPage from './pages/InterviewPrepPage'
 import SettingsPage from './pages/SettingsPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 
 // Environment-aware API base — uses relative '' when co-hosted on Railway, or VITE_API_BASE
 const API_BASE = import.meta.env.VITE_API_BASE ?? ''
@@ -18,9 +19,11 @@ const PAGE_TITLES = {
   resume: 'Resume Hub',
   interview: 'Interview Prep',
   settings: 'Settings',
+  'privacy-policy': 'Privacy Policy',
 }
 
 function getInitialPage() {
+  if (window.location.pathname === '/privacy-policy') return 'privacy-policy'
   const hash = window.location.hash.replace('#/', '').replace('#', '')
   return PAGE_TITLES[hash] ? hash : 'dashboard'
 }
@@ -51,7 +54,15 @@ export default function App() {
   // ── Hash-based routing ────────────────────────────────────────
   const navigate = useCallback((page) => {
     setActivePage(page)
-    window.location.hash = '#/' + page
+    if (page === 'privacy-policy') {
+      window.history.pushState({}, '', '/privacy-policy')
+      window.location.hash = ''
+    } else {
+      if (window.location.pathname === '/privacy-policy') {
+        window.history.pushState({}, '', '/')
+      }
+      window.location.hash = '#/' + page
+    }
   }, [])
 
   useEffect(() => {
@@ -204,6 +215,8 @@ export default function App() {
         return <InterviewPrepPage jobs={jobs} addToast={addToast} />
       case 'settings':
         return <SettingsPage mcpStatus={mcpStatus} addToast={addToast} />
+      case 'privacy-policy':
+        return <PrivacyPolicyPage />
       default:
         return <DashboardPage stats={stats} jobs={jobs} onNavigate={navigate} onOpenChat={() => setChatOpen(true)} />
     }
