@@ -303,6 +303,27 @@ async def score_job(req: ScoreRequest):
         "source_agent": evaluation.get("source_agent", "Career-Ops AI Evaluator")
     }
 
+# ── Resume Upload Endpoint ───────────────────────────────────────────────────
+
+@app.post("/api/upload-resume")
+async def upload_resume_endpoint(file: UploadFile = File(...)):
+    """Upload PDF, DOCX, DOC, or TEX resume to RESUMES_DIR."""
+    allowed_extensions = [".pdf", ".docx", ".doc", ".tex"]
+    ext = os.path.splitext(file.filename)[1].lower()
+    
+    if ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type. Allowed: {allowed_extensions}")
+        
+    file_path = os.path.join(RESUMES_DIR, file.filename)
+    
+    try:
+        content = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(content)
+        return {"status": "success", "filename": file.filename, "message": "File uploaded successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ── Pipeline CRUD Endpoints ──────────────────────────────────────────────────
 
 @app.get("/api/pipeline")

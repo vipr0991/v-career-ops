@@ -38,7 +38,7 @@ export default function App() {
   const [jobs, setJobs] = useState([])
   const [searchResults, setSearchResults] = useState([])
   const [searchFilters, setSearchFilters] = useState({
-    title: 'Marketing Manager', location: 'Dubai', currency: 'AED',
+    title: 'Senior Marketing Manager', location: 'Dubai, UAE', currency: 'AED', salary: 'Any'
   })
   const [selectedJob, setSelectedJob] = useState(null)
   const [scoringJobId, setScoringJobId] = useState(null)

@@ -167,12 +167,46 @@ export default function JobsPage({
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: 'var(--text-secondary)' }}>Target Region</label>
-            <input
-              type="text"
-              value={searchFilters.location}
+            <select
+              value={searchFilters.location || 'Dubai, UAE'}
               onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13 }}
-            />
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13, appearance: 'none' }}
+            >
+              {LOCATION_PRESETS.map(loc => <option key={loc.value} value={loc.value}>{loc.label}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: 'var(--text-secondary)' }}>Currency</label>
+              <select
+                value={searchFilters.currency || 'AED'}
+                onChange={(e) => setSearchFilters({ ...searchFilters, currency: e.target.value })}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13, appearance: 'none' }}
+              >
+                <option value="AED">AED (UAE)</option>
+                <option value="SAR">SAR (Saudi Arabia)</option>
+                <option value="QAR">QAR (Qatar)</option>
+                <option value="BHD">BHD (Bahrain)</option>
+                <option value="OMR">OMR (Oman)</option>
+                <option value="KWD">KWD (Kuwait)</option>
+                <option value="INR">INR (India)</option>
+                <option value="USD">USD (Global)</option>
+              </select>
+            </div>
+            <div style={{ flex: 2 }}>
+              <label style={{ display: 'block', fontSize: 12, marginBottom: 4, color: 'var(--text-secondary)' }}>Monthly Salary Range</label>
+              <select
+                value={searchFilters.salary || 'Any'}
+                onChange={(e) => setSearchFilters({ ...searchFilters, salary: e.target.value })}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13, appearance: 'none' }}
+              >
+                <option value="Any">Any Salary</option>
+                <option value="20k-30k">20k - 30k</option>
+                <option value="30k-40k">30k - 40k</option>
+                <option value="40k-50k">40k - 50k</option>
+                <option value="50k+">50k+</option>
+              </select>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
