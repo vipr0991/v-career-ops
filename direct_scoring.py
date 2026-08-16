@@ -37,7 +37,22 @@ class DirectScoringClient:
         self.gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
         self.timeout = 45.0
 
-    async def score_with_gemini(self, job_description: str, job_title: str = "", company: str = "", location: str = "") -> Optional[Dict[str, Any]]:
+    async def score_job(
+        self,
+        job_description: str = "",
+        job_title: str = "",
+        company: str = "",
+        location: str = "",
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Unified entry point for scoring a job description."""
+        jd = job_description or kwargs.get("jd", "") or kwargs.get("description", "")
+        title = job_title or kwargs.get("title", "")
+        comp = company or kwargs.get("company_name", "")
+        loc = location or kwargs.get("loc", "")
+        return await self.score_with_gemini(job_description=jd, job_title=title, company=comp, location=loc)
+
+    async def score_with_gemini(self, job_description: str, job_title: str = "", company: str = "", location: str = "") -> Dict[str, Any]:
         """Score job using Moonshot Kimi AI (with Gemini fallback) against 10-dimension rubric."""
         prompt = f"""You are an executive career evaluator and ATS algorithm specialist.
 Evaluate the following job description line-by-line against the candidate profile.
@@ -50,7 +65,7 @@ Target Job:
 - Company: {company}
 - Location: {location}
 - Description:
-{job_description[:3500]}
+{job_description[:6000]}
 
 Perform a comprehensive 10-dimension evaluation and return ONLY valid JSON with this exact schema:
 {{
@@ -107,13 +122,13 @@ Perform a comprehensive 10-dimension evaluation and return ONLY valid JSON with 
                         if json_match:
                             parsed = json.loads(json_match.group())
                             parsed["source_agent"] = "Moonshot Kimi"
-                            return parsed
+                            return self._normalize_score_dict(parsed)
             except Exception as e:
                 print(f"[Scoring] Moonshot Kimi scoring error: {e}")
 
         # 2. Try Gemini API Fallback
         if self.gemini_key:
-            for gmodel in ["gemini-3.7-flash", "gemini-flash-latest", "gemini-3.5-flash"]:
+            for gmodel in ["gemini-3.7-flash", "gemini-flash-latest"]:
                 try:
                     async with httpx.AsyncClient(timeout=self.timeout) as client:
                         response = await client.post(
@@ -133,11 +148,37 @@ Perform a comprehensive 10-dimension evaluation and return ONLY valid JSON with 
                             if json_match:
                                 parsed = json.loads(json_match.group())
                                 parsed["source_agent"] = f"Gemini ({gmodel})"
-                                return parsed
+                                return self._normalize_score_dict(parsed)
                 except Exception as e:
                     print(f"[Scoring] Gemini ({gmodel}) scoring error: {e}")
 
-        return self._heuristic_fallback_score(job_description, job_title, company, location)
+        return self._normalize_score_dict(self._heuristic_fallback_score(job_description, job_title, company, location))
+
+    def _normalize_score_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Harmonize score, verdict, and engine aliases."""
+        if not isinstance(data, dict):
+            return {"overall_score": 65, "total_score": 65, "verdict": "Stretch Match", "recommendation": "Review"}
+
+        # Score normalization
+        sc = data.get("overall_score") or data.get("total_score") or data.get("score") or 70
+        try:
+            sc = int(sc)
+        except Exception:
+            sc = 70
+        data["overall_score"] = sc
+        data["total_score"] = sc
+        data["score"] = sc
+
+        # Verdict normalization
+        vd = data.get("verdict") or data.get("recommendation") or "Stretch Match"
+        data["verdict"] = vd
+        data["recommendation"] = vd
+
+        # Engine normalization
+        eng = data.get("source_agent") or data.get("engine") or "Direct Scoring Engine"
+        data["source_agent"] = eng
+        data["engine"] = eng
+        return data
 
     def _heuristic_fallback_score(self, jd: str, title: str, company: str, location: str) -> Dict[str, Any]:
         """Heuristic rule-based fallback evaluation."""

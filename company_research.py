@@ -79,7 +79,8 @@ Return ONLY valid JSON with this exact structure:
                         content = data["choices"][0]["message"]["content"].strip()
                         json_match = re.search(r'\{[\s\S]*\}', content)
                         if json_match:
-                            return json.loads(json_match.group())
+                            parsed = json.loads(json_match.group())
+                            return self._normalize_research_dict(parsed, company_name, job_title, location)
             except Exception as e:
                 print(f"[Research] Moonshot Kimi research error: {e}")
 
@@ -103,11 +104,50 @@ Return ONLY valid JSON with this exact structure:
                             content = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
                             json_match = re.search(r'\{[\s\S]*\}', content)
                             if json_match:
-                                return json.loads(json_match.group())
+                                parsed = json.loads(json_match.group())
+                                return self._normalize_research_dict(parsed, company_name, job_title, location)
                 except Exception as e:
                     print(f"[Research] Gemini ({gmodel}) research error: {e}")
 
-        return self._default_research(company_name, job_title, location)
+        return self._normalize_research_dict(self._default_research(company_name, job_title, location), company_name, job_title, location)
+
+    def _normalize_research_dict(self, data: Dict[str, Any], company_name: str, job_title: str, location: str) -> Dict[str, Any]:
+        """Ensure standard keys and aliases are harmonized."""
+        if not isinstance(data, dict):
+            return self._default_research(company_name, job_title, location)
+
+        # Harmonize pain points
+        pain = data.get("strategic_pain_points") or data.get("pain_points") or []
+        if isinstance(pain, str):
+            pain = [pain]
+        data["strategic_pain_points"] = pain
+        data["pain_points"] = pain
+
+        # Harmonize talking points
+        talking = data.get("interview_talking_points") or data.get("talking_points") or []
+        if isinstance(talking, str):
+            talking = [talking]
+        data["interview_talking_points"] = talking
+        data["talking_points"] = talking
+
+        # Harmonize solutions
+        sol = data.get("candidate_solutions_to_pitch") or data.get("solutions") or []
+        if isinstance(sol, str):
+            sol = [sol]
+        data["candidate_solutions_to_pitch"] = sol
+        data["solutions"] = sol
+
+        # Harmonize initiatives
+        init = data.get("recent_initiatives_news") or data.get("initiatives") or []
+        if isinstance(init, str):
+            init = [init]
+        data["recent_initiatives_news"] = init
+        data["initiatives"] = init
+
+        data.setdefault("company_name", company_name)
+        data.setdefault("business_model", f"{company_name} operations in {location or 'GCC'}")
+        data.setdefault("hiring_signals", f"Scaling operations for {job_title}")
+        return data
 
     async def find_decision_makers(self, company_name: str, department: str = "Marketing") -> List[Dict[str, Any]]:
         """Identify recommended decision makers and draft LinkedIn outreach angles."""

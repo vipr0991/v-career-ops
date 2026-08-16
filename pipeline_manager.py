@@ -256,6 +256,24 @@ class PipelineManager:
             return True
         return False
 
+    def get_stats(self) -> Dict[str, Any]:
+        """Return summary metrics and stage counts across all pipeline jobs."""
+        data = self._load_data()
+        items = data.get("items", [])
+        stage_counts = {s: 0 for s in STAGES}
+        for it in items:
+            st = it.get("stage", "discovered")
+            stage_counts[st] = stage_counts.get(st, 0) + 1
+        return {
+            "total_jobs": len(items),
+            "stages": stage_counts,
+            "pipeline_saved": stage_counts.get("pipeline_saved", 0),
+            "interviewing": stage_counts.get("interviewing", 0),
+            "assets_generated": stage_counts.get("assets_generated", 0),
+            "outreach_active": stage_counts.get("outreach_active", 0),
+            "updated_at": data.get("updated_at")
+        }
+
 # Global Singleton Instances
 pipeline_store = PipelineManager()
 exclusion_store = ExclusionStore()

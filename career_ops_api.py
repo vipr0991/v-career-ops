@@ -83,10 +83,13 @@ class SearchRequest(BaseModel):
     limit: int = 15
 
 class ScoreRequest(BaseModel):
-    job_title: str
+    job_title: Optional[str] = None
+    role: Optional[str] = None
     company: str
-    job_description: str
+    job_description: Optional[str] = None
+    description: Optional[str] = None
     location: Optional[str] = "Dubai, UAE"
+    job_id: Optional[str] = None
 
 class PipelineItemRequest(BaseModel):
     title: str
@@ -454,10 +457,13 @@ async def score_job(req: ScoreRequest):
     Evaluates job descriptions across 10 dimensions against Vinay Prakash's profile.
     Automatically saves high-scoring matches (>= 85) to the Pipeline.
     """
+    title = req.job_title or req.role or "Target Role"
+    jd = req.job_description or req.description or f"Role: {title} at {req.company}"
+
     client = get_scoring_client()
-    evaluation = await client.score_with_gemini(
-        job_description=req.job_description,
-        job_title=req.job_title,
+    evaluation = await client.score_job(
+        job_description=jd,
+        job_title=title,
         company=req.company,
         location=req.location or "Dubai, UAE"
     )
@@ -673,7 +679,12 @@ async def get_report_file(filename: str):
 
 app.mount("/reports", StaticFiles(directory=REPORTS_DIR), name="reports")
 
-# â”€â”€ Pipeline CRUD Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Pipeline CRUD Endpoints ──────────────────────────────────────────────────
+
+@app.get("/api/pipeline/stats")
+async def get_pipeline_stats():
+    """Retrieve summary metrics and stage breakdown for the active Pipeline."""
+    return pipeline_store.get_stats()
 
 @app.get("/api/pipeline")
 async def get_pipeline(stage: Optional[str] = None, location: Optional[str] = None):
